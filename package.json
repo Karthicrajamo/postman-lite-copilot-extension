@@ -9,9 +9,7 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onCommand:postman-lite-copilot-extension.openPostmanLite"
-  ],
+  "activationEvents": [  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -32,7 +30,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
@@ -51,6 +49,10 @@
     "@vscode/test-electron": "^2.3.4",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
-    "ts-loader": "^9.4.4"
+    "ts-loader": "^9.4.4",
+    "@types/node-fetch": "^2.6.11"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
   }
 }

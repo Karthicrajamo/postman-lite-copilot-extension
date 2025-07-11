@@ -18,7 +18,7 @@
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        min-height: 100vh;
+        min-height: 100vh; /* Ensures body takes at least full viewport height */
         padding: 20px;
         box-sizing: border-box;
       }
@@ -32,17 +32,20 @@
         border-radius: 12px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         padding: 24px;
+        /* Removed fixed height, let it grow with content */
       }
       .main-content-wrapper {
         display: flex;
         flex-direction: column; /* Stack client and copilot on small screens */
         gap: 20px;
         flex-grow: 1; /* Allow this wrapper to take available space */
+        min-height: 0; /* Important for flex items to shrink below their content size */
       }
       @media (min-width: 1024px) {
         /* Flex row for larger screens */
         .main-content-wrapper {
-          flex-direction: row; /* Side-by-side on large screens */
+          flex-direction: row;
+          flex-grow: 1; /* Allow side-by-side sections to grow */
         }
       }
       .api-client-section,
@@ -53,17 +56,9 @@
         background-color: #f9fafb;
         box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
         min-width: 300px; /* Ensure sections don't get too small */
-      }
-      .api-client-section {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-      .copilot-section {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        min-height: 400px; /* Ensure a minimum height for chat */
+        display: flex; /* Make them flex containers */
+        flex-direction: column; /* Stack their children vertically */
+        min-height: 0; /* Allow them to shrink if content is too large */
       }
       .section-title {
         font-size: 1.5rem;
@@ -72,9 +67,14 @@
         margin-bottom: 15px;
         border-bottom: 2px solid #e2e8f0;
         padding-bottom: 10px;
+        flex-shrink: 0; /* Prevent title from shrinking */
+      }
+      .responseApi {
+        margin-top: 24px; /* Adjusted margin-top for proper spacing */
       }
       .input-group {
         margin-bottom: 15px;
+        flex-shrink: 0; /* Prevent input groups from shrinking */
       }
       .input-group label {
         display: block;
@@ -105,6 +105,7 @@
         display: flex;
         gap: 10px;
         flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        flex-shrink: 0; /* Prevent button group from shrinking */
       }
       .send-button,
       .clear-button {
@@ -157,20 +158,22 @@
         font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
           Courier, monospace;
         font-size: 0.9rem;
-        white-space: pre-wrap;
-        word-break: break-all;
         min-height: 150px;
         max-height: 300px; /* Fixed height with scroll */
         overflow-y: auto;
         border: 1px solid #cbd5e0; /* Lighter border for light background */
         position: relative; /* For positioning copy button */
         width: 100%; /* Ensure it takes full width when stacked */
+        display: flex; /* Use flexbox for internal layout */
+        flex-direction: column; /* Stack status, content, and button */
+        flex-shrink: 0; /* Prevent response area from shrinking */
       }
       .response-status {
         font-weight: 600;
         margin-bottom: 10px;
         padding-bottom: 5px;
         border-bottom: 1px dashed #a0aec0; /* Adjusted for contrast */
+        flex-shrink: 0; /* Prevent status from shrinking */
       }
       .response-status.success {
         color: #2f855a;
@@ -181,6 +184,34 @@
       .response-status.info {
         color: #d69e2e;
       } /* Darker yellow */
+
+      .response-content {
+        flex-grow: 1; /* Allow content to take available height */
+        overflow-y: auto; /* Make content scrollable */
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
+          Courier, monospace;
+        font-size: 0.9rem;
+        white-space: pre; /* Preserve whitespace and line breaks for code */
+        word-break: break-all;
+        padding-top: 10px; /* Space below status */
+      }
+      .response-line {
+        display: flex; /* Use flex for line number and text */
+        line-height: 1.4; /* Adjust line height for readability */
+      }
+      .response-line .line-number {
+        color: #a0aec0; /* Lighter gray for numbers */
+        margin-right: 15px;
+        user-select: none; /* Prevent selecting line numbers */
+        text-align: right;
+        min-width: 40px; /* Ensure enough space for numbers (e.g., up to 9999 lines) */
+        flex-shrink: 0; /* Don't shrink line numbers */
+      }
+      .response-line .line-text {
+        flex-grow: 1; /* Allow text to take remaining space */
+        word-break: break-all; /* Break long words */
+        white-space: pre-wrap; /* Wrap text within the content area */
+      }
 
       .copy-button {
         position: absolute;
@@ -193,6 +224,7 @@
         border: none;
         cursor: pointer;
         font-size: 0.8rem;
+        width: 100px;
         transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
       }
       .copy-button:hover {
@@ -201,9 +233,12 @@
       }
 
       /* Copilot Chat Styling */
+      .copilot-section {
+        /* Removed min-height from copilot-section directly */
+      }
       .chat-messages {
         flex-grow: 1;
-        overflow-y: auto;
+        overflow-y: auto; /* This makes the chat messages scrollable */
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         padding: 15px;
@@ -211,8 +246,8 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
-        /* Ensure it has a defined height to scroll within */
-        min-height: 250px; /* Adjusted min-height for chat messages */
+        min-height: 0; /* Crucial for flex-grow to work and allow shrinking */
+        max-height: 700px;
       }
       .chat-message {
         max-width: 90%;
@@ -252,6 +287,7 @@
         display: flex;
         gap: 10px;
         margin-top: 15px;
+        flex-shrink: 0; /* Prevent input area from shrinking */
       }
       .chat-input-area input {
         flex-grow: 1;
@@ -378,7 +414,7 @@
             <input
               type="text"
               id="url"
-              placeholder="Enter API URL (e.g., https://jsonplaceholder.typicode.com/posts)"
+              placeholder="Enter API URL (e.g., https://jsonplaceholder.typicode.com/posts?userId=1&id=1)"
             />
           </div>
 
@@ -436,12 +472,13 @@
         </div>
       </div>
 
-      <h2 class="section-title mt-6">API Response</h2>
+      <h2 class="section-title responseApi">API Response</h2>
       <div id="responseDisplay" class="response-area">
         <div id="responseStatus" class="response-status info">
           Awaiting request...
         </div>
-        <pre id="responseBody"></pre>
+        <div id="responseContent" class="response-content"></div>
+        <!-- New container for numbered lines -->
         <button
           id="copyResponseBtn"
           class="copy-button"
@@ -462,12 +499,6 @@
     </div>
 
     <script type="module">
-      // Global variables for Firebase configuration (not applicable in VS Code extension, using defaults)
-      const appId = "vscode-postman-lite"; // A simple ID for your VS Code extension context
-      const firebaseConfig = {}; // Firebase is not directly integrated in this VS Code extension
-      const initialAuthToken = null; // No Firebase auth token in this context
-
-      // VS Code API for Webview communication
       // @ts-ignore
       const vscode = acquireVsCodeApi();
 
@@ -479,15 +510,15 @@
       const headersTextarea = document.getElementById("headers");
       const bodyTextarea = document.getElementById("body");
       const sendRequestBtn = document.getElementById("sendRequestBtn");
-      const clearFormBtn = document.getElementById("clearFormBtn"); // New clear button
+      const clearFormBtn = document.getElementById("clearFormBtn");
       const responseStatusDiv = document.getElementById("responseStatus");
-      const responseBodyPre = document.getElementById("responseBody");
-      const copyResponseBtn = document.getElementById("copyResponseBtn"); // New copy button
+      const responseContentDiv = document.getElementById("responseContent");
+      const copyResponseBtn = document.getElementById("copyResponseBtn");
 
       const chatMessagesDiv = document.getElementById("chatMessages");
       const copilotInput = document.getElementById("copilotInput");
       const sendCopilotBtn = document.getElementById("sendCopilotBtn");
-      const apiKeyLoadingIndicator = document.getElementById("apiKeyLoading"); // New API Key loading indicator
+      const apiKeyLoadingIndicator = document.getElementById("apiKeyLoading");
 
       const messageBoxOverlay = document.getElementById("messageBoxOverlay");
       const messageBoxTitle = document.getElementById("messageBoxTitle");
@@ -529,17 +560,43 @@
       });
 
       /**
-       * Formats a JSON string for display.
-       * @param {string} jsonString - The JSON string to format.
-       * @returns {string} - Pretty-printed JSON or original string if invalid.
+       * Helper to escape HTML for displaying raw text safely
        */
-      function formatJson(jsonString) {
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+      }
+
+      /**
+       * Renders response content with line numbers.
+       * @param {string} text - The raw text content to display.
+       */
+      function renderResponseContentWithLineNumbers(text) {
+        responseContentDiv.innerHTML = ""; // Clear previous content
+
+        if (!text) return;
+
+        let formattedText = text;
         try {
-          const obj = JSON.parse(jsonString);
-          return JSON.stringify(obj, null, 2);
+          // Try to pretty print JSON if it's valid
+          formattedText = JSON.stringify(JSON.parse(text), null, 2);
         } catch (e) {
-          return jsonString; // Return original if not valid JSON
+          // Not JSON, use as is
         }
+
+        const lines = formattedText.split("\n");
+        lines.forEach((line, index) => {
+          const lineDiv = document.createElement("div");
+          lineDiv.classList.add("response-line");
+          // Use a span for the line number and another for the content
+          lineDiv.innerHTML = `<span class="line-number">${String(
+            index + 1
+          ).padStart(4, " ")}</span><span class="line-text">${escapeHtml(
+            line
+          )}</span>`;
+          responseContentDiv.appendChild(lineDiv);
+        });
       }
 
       /**
@@ -556,7 +613,7 @@
         } catch (e) {
           showMessageBox(
             "Invalid Headers",
-            "Headers must be a valid JSON object."
+            'Headers must be a valid JSON object. Example: `{"Content-Type": "application/json"}`'
           );
           return null;
         }
@@ -617,7 +674,7 @@
           '<i class="fas fa-paper-plane"></i> Send Request';
       }
 
-      // --- API Request Logic ---
+      // --- API Request Logic (Now sends to Extension Host) ---
 
       sendRequestBtn.addEventListener("click", async () => {
         const method = methodSelect.value;
@@ -625,15 +682,16 @@
         const headers = parseHeaders(headersTextarea.value);
         const body = bodyTextarea.value.trim();
 
+        console.log("Webview: Send Request button clicked."); // Log when button is clicked
+
         if (!url) {
           showMessageBox(
             "Missing URL",
-            "Please enter a URL for the API request."
+            "Please enter a URL for the API request. Example: `https://jsonplaceholder.typicode.com/posts`"
           );
           return;
         }
         if (!headers) {
-          // parseHeaders returns null on error
           return;
         }
 
@@ -644,7 +702,7 @@
           } catch (e) {
             showMessageBox(
               "Invalid Body",
-              "Request body must be a valid JSON object."
+              'Request body must be a valid JSON object. Example: `{"key": "value"}`'
             );
             return;
           }
@@ -653,64 +711,17 @@
         showSendButtonLoading();
         responseStatusDiv.textContent = "Sending request...";
         responseStatusDiv.className = "response-status info";
-        responseBodyPre.textContent = "";
+        responseContentDiv.innerHTML = "";
 
-        try {
-          const options = {
-            method: method,
-            headers: new Headers(headers),
-          };
-
-          if (
-            requestBody &&
-            (method === "POST" || method === "PUT" || method === "PATCH")
-          ) {
-            options.body = JSON.stringify(requestBody);
-          }
-
-          const startTime = performance.now();
-          const response = await fetch(url, options);
-          const endTime = performance.now();
-          const timeTaken = (endTime - startTime).toFixed(2);
-
-          const responseContentType = response.headers.get("Content-Type");
-          let responseData;
-
-          if (
-            responseContentType &&
-            responseContentType.includes("application/json")
-          ) {
-            responseData = await response.json();
-            responseBodyPre.textContent = formatJson(
-              JSON.stringify(responseData)
-            );
-          } else {
-            responseData = await response.text();
-            responseBodyPre.textContent = responseData;
-          }
-
-          responseStatusDiv.textContent = `Status: ${response.status} ${response.statusText} (${timeTaken}ms)`;
-          if (response.ok) {
-            responseStatusDiv.classList.remove("error", "info");
-            responseStatusDiv.classList.add("success");
-          } else {
-            responseStatusDiv.classList.remove("success", "info");
-            responseStatusDiv.classList.add("error");
-          }
-        } catch (error) {
-          // Modified error message for clarity
-          responseStatusDiv.textContent = `Error: ${error.message}`;
-          responseStatusDiv.classList.remove("success", "info");
-          responseStatusDiv.classList.add("error");
-          responseBodyPre.textContent =
-            "Failed to fetch. Check console for details.";
-          showMessageBox(
-            "Request Failed",
-            `Could not send request: ${error.message}. This often happens if the URL is not a valid API endpoint, or due to network/CORS issues.`
-          );
-        } finally {
-          hideSendButtonLoading();
-        }
+        // Send message to extension host to make the request
+        console.log(
+          "Webview: Sending sendHttpRequest message to extension host for URL:",
+          url
+        ); // Log before sending message
+        vscode.postMessage({
+          command: "sendHttpRequest",
+          data: { method, url, headers, body: requestBody },
+        });
       });
 
       // --- Clear Form Logic ---
@@ -729,7 +740,7 @@
         bodyTextarea.value = "";
         responseStatusDiv.textContent = "Awaiting request...";
         responseStatusDiv.className = "response-status info";
-        responseBodyPre.textContent = "";
+        responseContentDiv.innerHTML = ""; // Clear content
         showMessageBox(
           "Form Cleared",
           "All request fields have been reset to default."
@@ -738,7 +749,15 @@
 
       // --- Copy Response Logic ---
       copyResponseBtn.addEventListener("click", () => {
-        const textToCopy = responseBodyPre.textContent;
+        // Get the raw text content from the lines, excluding line numbers
+        let textToCopy = "";
+        document
+          .querySelectorAll(".response-line .line-text")
+          .forEach((span) => {
+            textToCopy += span.textContent + "\n";
+          });
+        textToCopy = textToCopy.trim(); // Remove trailing newline
+
         if (textToCopy) {
           // Use a temporary textarea to copy text to clipboard
           const tempTextArea = document.createElement("textarea");
@@ -762,7 +781,7 @@
         }
       });
 
-      // --- Copilot AI Logic ---
+      // --- Copilot AI Logic (Now sends to Extension Host) ---
 
       /**
        * Displays the detailed guidance message for setting the API key.
@@ -784,106 +803,6 @@
         sendCopilotBtn.disabled = true; // Keep disabled
       }
 
-      /**
-       * Calls the Gemini API to get AI suggestions.
-       * @param {string} prompt - The user's prompt.
-       * @returns {Promise<string>} - The AI's response text.
-       */
-      async function getCopilotSuggestion(prompt) {
-        if (!geminiApiKey) {
-          showApiKeyGuidance(); // Show guidance if key is missing
-          return "Error: Gemini API Key is not set.";
-        }
-
-        let chatHistory = [];
-        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-
-        const payload = { contents: chatHistory };
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
-
-        try {
-          const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-          const result = await response.json();
-
-          if (
-            result.candidates &&
-            result.candidates.length > 0 &&
-            result.candidates[0].content &&
-            result.candidates[0].content.parts &&
-            result.candidates[0].content.parts.length > 0
-          ) {
-            return result.candidates[0].content.parts[0].text;
-          } else {
-            console.error("Unexpected AI response structure:", result);
-            return "Sorry, I could not generate a response. Please try again.";
-          }
-        } catch (error) {
-          console.error("Error calling Gemini API:", error);
-          return "An error occurred while connecting to the AI. Please check your network or API key.";
-        }
-      }
-
-      /**
-       * Parses AI response to update the request form.
-       * Expected AI format (example):
-       * ```json
-       * {
-       * "url": "[https://api.example.com/users](https://api.example.com/users)",
-       * "method": "POST",
-       * "headers": {
-       * "Content-Type": "application/json",
-       * "Authorization": "Bearer YOUR_TOKEN"
-       * },
-       * "body": {
-       * "name": "John Doe",
-       * "email": "john.doe@example.com"
-       * }
-       * }
-       * ```
-       * @param {string} aiText - The raw text response from the AI.
-       */
-      function applyAiSuggestions(aiText) {
-        try {
-          // Attempt to extract JSON from markdown code block
-          const jsonMatch = aiText.match(/```json\n([\s\S]*?)\n```/);
-          let jsonString = jsonMatch ? jsonMatch[1] : aiText; // Fallback to raw text if no code block
-
-          const suggestion = JSON.parse(jsonString);
-
-          if (suggestion.url) {
-            urlInput.value = suggestion.url;
-          }
-          if (suggestion.method) {
-            methodSelect.value = suggestion.method.toUpperCase();
-          }
-          if (suggestion.headers) {
-            headersTextarea.value = JSON.stringify(suggestion.headers, null, 2);
-          }
-          if (suggestion.body) {
-            bodyTextarea.value = JSON.stringify(suggestion.body, null, 2);
-          }
-          addChatMessage(
-            "I've updated the request form based on your command!",
-            "ai"
-          );
-        } catch (e) {
-          console.warn(
-            "AI suggestion could not be parsed as JSON or applied:",
-            aiText,
-            e
-          );
-          addChatMessage(
-            "I received a suggestion from the AI, but it wasn't in a format I could automatically apply to the form. Here's what it said: " +
-              aiText,
-            "ai"
-          );
-        }
-      }
-
       sendCopilotBtn.addEventListener("click", async () => {
         const userPrompt = copilotInput.value.trim();
         if (!userPrompt) {
@@ -894,14 +813,13 @@
           return;
         }
 
-        // If API key is not set, show guidance instead of sending request
         if (!geminiApiKey) {
-          showApiKeyGuidance(); // Show guidance if key is missing
+          showApiKeyGuidance();
           return;
         }
 
         addChatMessage(userPrompt, "user");
-        copilotInput.value = ""; // Clear input
+        copilotInput.value = "";
 
         const loadingIndicator = showChatLoading();
 
@@ -911,10 +829,9 @@
           headers: headersTextarea.value,
           body: bodyTextarea.value,
           responseStatus: responseStatusDiv.textContent,
-          responseBody: responseBodyPre.textContent,
+          responseBody: responseContentDiv.textContent,
         };
 
-        // --- REFINED PROMPT FOR DIRECT URL HANDLING & REDUCING QUESTIONS ---
         let fullPrompt = `You are an AI assistant for an API client.
             The user wants to perform an action related to an API request.
             If the user's request contains a URL (e.g., "https://example.com/api" or "https://www.npmjs.com/package/axios"), assume they want to generate a request for that URL.
@@ -970,7 +887,6 @@
             \`\`\`
             `;
 
-        // If the user's prompt suggests test generation or explanation, adjust the prompt accordingly
         if (
           userPrompt.toLowerCase().includes("test") ||
           userPrompt.toLowerCase().includes("assertion")
@@ -1014,33 +930,27 @@
           userPrompt.toLowerCase().includes("troubleshoot")
         ) {
           fullPrompt = `You are an AI assistant for an API client. The user wants an explanation or troubleshooting advice.
-                 User's request: "${userPrompt}"
-                 Current API request context:
-                 URL: ${currentRequest.url || "Not set"}
-                 Method: ${currentRequest.method || "Not set"}
-                 Last Response Status: ${
-                   currentRequest.responseStatus || "No response yet"
-                 }
-                 Last Response Body: ${
-                   currentRequest.responseBody || "No response yet"
-                 }
+                User's request: "${userPrompt}"
+                Current API request context:
+                URL: ${currentRequest.url || "Not set"}
+                Method: ${currentRequest.method || "Not set"}
+                Last Response Status: ${
+                  currentRequest.responseStatus || "No response yet"
+                }
+                Last Response Body: ${
+                  currentRequest.responseBody || "No response yet"
+                }
 
-                 Provide a concise, plain text explanation.
-                 Example: "A 404 Not Found error means the server could not find the requested resource. Check the URL for typos or if the resource exists on the server."
-                 `;
+                Provide a concise, plain text explanation.
+                Example: "A 404 Not Found error means the server could not find the requested resource. Check the URL for typos or if the resource exists on the server."
+                `;
         }
 
-        const aiResponse = await getCopilotSuggestion(fullPrompt);
-        hideChatLoading(loadingIndicator);
-
-        // Attempt to apply AI suggestions if it's a structured JSON response
-        if (aiResponse && aiResponse.includes("```json")) {
-          // Check if aiResponse is not empty before checking for json block
-          applyAiSuggestions(aiResponse);
-        } else if (aiResponse) {
-          // If there's a response but not JSON, just add it to chat
-          addChatMessage(aiResponse, "ai");
-        }
+        // Send message to extension host for Gemini AI request
+        vscode.postMessage({
+          command: "getGeminiSuggestion",
+          data: { prompt: fullPrompt },
+        });
       });
 
       copilotInput.addEventListener("keypress", (e) => {
@@ -1049,50 +959,87 @@
         }
       });
 
-      // --- VS Code Webview Communication for API Key ---
-
-      // Listen for messages from the extension host
+      // --- Receive API Response from Extension Host ---
       window.addEventListener("message", (event) => {
-        const message = event.data; // The JSON data sent from the extension host
-
+        const message = event.data;
         switch (message.command) {
+          case "httpResponse":
+            hideSendButtonLoading();
+            const { status, statusText, timeTaken, responseData, error } =
+              message.data;
+
+            if (error) {
+              responseStatusDiv.textContent = `Error: ${error.message}`;
+              responseStatusDiv.classList.remove("success", "info");
+              responseStatusDiv.classList.add("error");
+              responseContentDiv.innerHTML =
+                '<div class="response-line"><span class="line-number">   1</span><span class="line-text">Failed to fetch. Check VS Code output for details.</span></div>';
+              showMessageBox(
+                "Request Failed",
+                `Could not send request: ${error.message}. This often happens if the URL is not a valid API endpoint, or due to network issues.`
+              );
+            } else {
+              responseStatusDiv.textContent = `Status: ${status} ${statusText} (${timeTaken}ms)`;
+              if (status >= 200 && status < 300) {
+                responseStatusDiv.classList.remove("error", "info");
+                responseStatusDiv.classList.add("success");
+              } else {
+                responseStatusDiv.classList.remove("success", "info");
+                responseStatusDiv.classList.add("error");
+              }
+              renderResponseContentWithLineNumbers(responseData);
+            }
+            break;
+
           case "sendGeminiApiKey":
             geminiApiKey = message.apiKey;
-            hideChatLoading(apiKeyLoadingIndicator); // Hide the loading indicator
+            hideChatLoading(apiKeyLoadingIndicator);
             if (geminiApiKey) {
               addChatMessage(
                 "Gemini AI is ready! You can now ask for assistance.",
                 "ai"
               );
-              copilotInput.disabled = false; // Enable input
-              sendCopilotBtn.disabled = false; // Enable button
-              // Add sample requests to chat after AI is ready
+              copilotInput.disabled = false;
+              sendCopilotBtn.disabled = false;
               addChatMessage(
                 `
                             <p>You can try these sample requests:</p>
                             <ul>
-                                <li><span class="sample-request-link" data-url="https://jsonplaceholder.typicode.com/posts/1" data-method="GET">GET: JSONPlaceholder Post</span></li>
-                                <li><span class="sample-request-link" data-url="https://registry.npmjs.org/axios" data-method="GET">GET: NPM 'axios' package info</span></li>
-                                <li><span class="sample-request-link" data-url="https://api.github.com/repos/octocat/Spoon-Knife" data-method="GET">GET: GitHub 'Spoon-Knife' repo info</span></li>
-                                <li><span class="sample-request-link" data-url="https://jsonplaceholder.typicode.com/posts" data-method="POST" data-body='{"title": "My New Post", "body": "This is some content.", "userId": 1}'>POST: JSONPlaceholder New Post</span></li>
+                                <li><span class="sample-request-link" data-url="https://jsonplaceholder.typicode.com/posts/1" data-method="GET" data-headers='{}'>GET: JSONPlaceholder Post</span></li>
+                                <li><span class="sample-request-link" data-url="https://registry.npmjs.org/axios" data-method="GET" data-headers='{}'>GET: NPM 'axios' package info</span></li>
+                                <li><span class="sample-request-link" data-url="https://api.github.com/repos/octocat/Spoon-Knife" data-method="GET" data-headers='{}'>GET: GitHub 'Spoon-Knife' repo info</span></li>
+                                <li><span class="sample-request-link" data-url="https://jsonplaceholder.typicode.com/posts" data-method="POST" data-headers='{"Content-Type": "application/json"}' data-body='{"title": "My New Post", "body": "This is some content.", "userId": 1}'>POST: JSONPlaceholder New Post</span></li>
                             </ul>
                             <p>Click on any of them to auto-fill the request form!</p>
                         `,
                 "ai"
               );
 
-              // Attach event listeners to sample links
               document
                 .querySelectorAll(".sample-request-link")
                 .forEach((link) => {
                   link.addEventListener("click", function () {
                     urlInput.value = this.dataset.url || "";
                     methodSelect.value = this.dataset.method || "GET";
-                    headersTextarea.value = JSON.stringify(
-                      { "Content-Type": "application/json" },
-                      null,
-                      2
-                    );
+                    try {
+                      headersTextarea.value = this.dataset.headers
+                        ? JSON.stringify(
+                            JSON.parse(this.dataset.headers),
+                            null,
+                            2
+                          )
+                        : JSON.stringify(
+                            { "Content-Type": "application/json" },
+                            null,
+                            2
+                          );
+                    } catch (e) {
+                      headersTextarea.value = JSON.stringify(
+                        { "Content-Type": "application/json" },
+                        null,
+                        2
+                      );
+                    }
                     bodyTextarea.value = this.dataset.body
                       ? JSON.stringify(JSON.parse(this.dataset.body), null, 2)
                       : "";
@@ -1103,15 +1050,31 @@
                   });
                 });
             } else {
-              // Display the detailed guidance message directly in the chat
               showApiKeyGuidance();
+            }
+            break;
+
+          case "geminiResponse":
+            // Assuming loadingElement is passed back in the message.data
+            // If not, you might need a global way to track the loading indicator
+            // or remove this parameter.
+            hideChatLoading(document.querySelector(".loading-indicator.ai")); // Fallback if element not passed
+
+            if (message.data.error) {
+              addChatMessage(`AI Error: ${message.data.error.message}`, "ai");
+            } else {
+              if (
+                message.data.aiText &&
+                message.data.aiText.includes("```json")
+              ) {
+                applyAiSuggestions(message.data.aiText);
+              } else if (message.data.aiText) {
+                addChatMessage(message.data.aiText, "ai");
+              }
             }
             break;
         }
       });
-
-      // Request the API key from the extension host when the webview loads
-      vscode.postMessage({ command: "getGeminiApiKey" });
 
       // Initial setup for headers and body textareas
       headersTextarea.value = JSON.stringify(
