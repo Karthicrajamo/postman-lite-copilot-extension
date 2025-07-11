@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Postman Lite with Copilot</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+      .container {
+        display: flex;
+        flex-direction: column; /* Main container is column to stack sections */
+        gap: 20px;
+        width: 100%;
+        max-width: 1200px;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 24px;
+      }
+      .main-content-wrapper {
+        display: flex;
+        flex-direction: column; /* Stack client and copilot on small screens */
+        gap: 20px;
+        flex-grow: 1; /* Allow this wrapper to take available space */
+      }
+      @media (min-width: 1024px) {
+        /* Flex row for larger screens */
+        .main-content-wrapper {
+          flex-direction: row; /* Side-by-side on large screens */
+        }
+      }
+      .api-client-section,
+      .copilot-section {
+        flex: 1;
+        padding: 20px;
+        border-radius: 10px;
+        background-color: #f9fafb;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        min-width: 300px; /* Ensure sections don't get too small */
+      }
+      .api-client-section {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .copilot-section {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        min-height: 400px; /* Ensure a minimum height for chat */
+      }
+      .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 10px;
+      }
+      .input-group {
+        margin-bottom: 15px;
+      }
+      .input-group label {
+        display: block;
+        font-weight: 500;
+        color: #4a5568;
+        margin-bottom: 5px;
+      }
+      .input-group input,
+      .input-group select,
+      .input-group textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #cbd5e0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        color: #2d3748;
+        background-color: white;
+        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+      }
+      .input-group input:focus,
+      .input-group select:focus,
+      .input-group textarea:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      }
+      .button-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+      }
+      .send-button,
+      .clear-button {
+        flex: 1; /* Allow buttons to grow */
+        min-width: 150px; /* Ensure buttons are not too small */
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .send-button {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+      }
+      .send-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(99, 102, 241, 0.4);
+      }
+      .send-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 5px rgba(99, 102, 241, 0.2);
+      }
+      .clear-button {
+        background-color: #e2e8f0;
+        color: #4a5568;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      }
+      .clear-button:hover {
+        background-color: #cbd5e0;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      }
+      .clear-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+      }
+
+      .response-area {
+        background-color: #ffffff; /* Changed to white */
+        color: #333333; /* Changed to black/dark gray */
+        padding: 15px;
+        border-radius: 8px;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
+          Courier, monospace;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+        word-break: break-all;
+        min-height: 150px;
+        max-height: 300px; /* Fixed height with scroll */
+        overflow-y: auto;
+        border: 1px solid #cbd5e0; /* Lighter border for light background */
+        position: relative; /* For positioning copy button */
+        width: 100%; /* Ensure it takes full width when stacked */
+      }
+      .response-status {
+        font-weight: 600;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px dashed #a0aec0; /* Adjusted for contrast */
+      }
+      .response-status.success {
+        color: #2f855a;
+      } /* Darker green */
+      .response-status.error {
+        color: #c53030;
+      } /* Darker red */
+      .response-status.info {
+        color: #d69e2e;
+      } /* Darker yellow */
+
+      .copy-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(0, 0, 0, 0.1);
+        color: #4a5568;
+        padding: 5px 8px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+      }
+      .copy-button:hover {
+        background-color: rgba(0, 0, 0, 0.2);
+        color: #2d3748;
+      }
+
+      /* Copilot Chat Styling */
+      .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        /* Ensure it has a defined height to scroll within */
+        min-height: 250px; /* Adjusted min-height for chat messages */
+      }
+      .chat-message {
+        max-width: 90%;
+        padding: 10px 15px;
+        border-radius: 15px;
+        word-wrap: break-word;
+        line-height: 1.5;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+      .chat-message.user {
+        background-color: #6366f1;
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 2px;
+      }
+      .chat-message.ai {
+        background-color: #e0e7ff;
+        color: #333;
+        align-self: flex-start;
+        border-bottom-left-radius: 2px;
+      }
+      .chat-message.ai a {
+        color: #4f46e5;
+        text-decoration: underline;
+      }
+      .chat-message.ai .sample-request-link {
+        cursor: pointer;
+        color: #4f46e5;
+        text-decoration: underline;
+        font-weight: 500;
+      }
+      .chat-message.ai .sample-request-link:hover {
+        color: #6366f1;
+      }
+
+      .chat-input-area {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .chat-input-area input {
+        flex-grow: 1;
+        padding: 10px 15px;
+        border: 1px solid #cbd5e0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+      }
+      .chat-input-area button {
+        background-color: #4f46e5;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+      }
+      .chat-input-area button:hover {
+        background-color: #4338ca;
+      }
+      .loading-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #6366f1;
+        font-weight: 500;
+      }
+      .loading-indicator .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #6366f1;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Message Box Styling */
+      .message-box-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .message-box {
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        transform: scale(0.95);
+        animation: scaleIn 0.2s ease-out forwards;
+      }
+      @keyframes scaleIn {
+        from {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .message-box h3 {
+        font-size: 1.5rem;
+        color: #333;
+        margin-bottom: 15px;
+      }
+      .message-box p {
+        color: #555;
+        margin-bottom: 25px;
+        line-height: 1.6;
+      }
+      .message-box button {
+        background-color: #6366f1;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background-color 0.2s ease-in-out;
+      }
+      .message-box button:hover {
+        background-color: #4f46e5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="main-content-wrapper">
+        <!-- API Client Section -->
+        <div class="api-client-section">
+          <h2 class="section-title">API Request</h2>
+
+          <div class="input-group">
+            <label for="method">Method:</label>
+            <select id="method" class="w-full p-2 border rounded-md">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+              <option value="PATCH">PATCH</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="url">URL:</label>
+            <input
+              type="text"
+              id="url"
+              placeholder="Enter API URL (e.g., https://jsonplaceholder.typicode.com/posts)"
+            />
+          </div>
+
+          <div class="input-group">
+            <label for="headers">Headers (JSON):</label>
+            <textarea
+              id="headers"
+              rows="4"
+              placeholder='{"Content-Type": "application/json"}'
+              class="resize-y"
+            ></textarea>
+          </div>
+
+          <div class="input-group">
+            <label for="body">Body (JSON):</label>
+            <textarea
+              id="body"
+              rows="6"
+              placeholder='{"key": "value"}'
+              class="resize-y"
+            ></textarea>
+          </div>
+
+          <div class="button-group">
+            <button id="sendRequestBtn" class="send-button">
+              <i class="fas fa-paper-plane"></i> Send Request
+            </button>
+            <button id="clearFormBtn" class="clear-button">
+              <i class="fas fa-eraser"></i> Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Copilot Extension Section -->
+        <div class="copilot-section">
+          <h2 class="section-title">Copilot AI Assistant</h2>
+          <div id="chatMessages" class="chat-messages">
+            <!-- Initial messages will be added by JS -->
+            <div class="chat-message ai loading-indicator" id="apiKeyLoading">
+              <div class="spinner"></div>
+              <span>Loading AI Assistant...</span>
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <input
+              type="text"
+              id="copilotInput"
+              placeholder="Ask me anything about your API..."
+              disabled
+            />
+            <button id="sendCopilotBtn" disabled>
+              <i class="fas fa-comment-dots"></i> Send
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-title mt-6">API Response</h2>
+      <div id="responseDisplay" class="response-area">
+        <div id="responseStatus" class="response-status info">
+          Awaiting request...
+        </div>
+        <pre id="responseBody"></pre>
+        <button
+          id="copyResponseBtn"
+          class="copy-button"
+          title="Copy response to clipboard"
+        >
+          <i class="fas fa-copy"></i> Copy
+        </button>
+      </div>
+    </div>
+
+    <!-- Message Box Container -->
+    <div id="messageBoxOverlay" class="message-box-overlay hidden">
+      <div class="message-box">
+        <h3 id="messageBoxTitle"></h3>
+        <p id="messageBoxContent"></p>
+        <button id="messageBoxCloseBtn">OK</button>
+      </div>
+    </div>
+
+    <script type="module">
+      // Global variables for Firebase configuration (not applicable in VS Code extension, using defaults)
+      const appId = "vscode-postman-lite"; // A simple ID for your VS Code extension context
+      const firebaseConfig = {}; // Firebase is not directly integrated in this VS Code extension
+      const initialAuthToken = null; // No Firebase auth token in this context
+
+      // VS Code API for Webview communication
+      // @ts-ignore
+      const vscode = acquireVsCodeApi();
+
+      let geminiApiKey = ""; // This will be set by the extension host
+
+      // DOM Elements
+      const methodSelect = document.getElementById("method");
+      const urlInput = document.getElementById("url");
+      const headersTextarea = document.getElementById("headers");
+      const bodyTextarea = document.getElementById("body");
+      const sendRequestBtn = document.getElementById("sendRequestBtn");
+      const clearFormBtn = document.getElementById("clearFormBtn"); // New clear button
+      const responseStatusDiv = document.getElementById("responseStatus");
+      const responseBodyPre = document.getElementById("responseBody");
+      const copyResponseBtn = document.getElementById("copyResponseBtn"); // New copy button
+
+      const chatMessagesDiv = document.getElementById("chatMessages");
+      const copilotInput = document.getElementById("copilotInput");
+      const sendCopilotBtn = document.getElementById("sendCopilotBtn");
+      const apiKeyLoadingIndicator = document.getElementById("apiKeyLoading"); // New API Key loading indicator
+
+      const messageBoxOverlay = document.getElementById("messageBoxOverlay");
+      const messageBoxTitle = document.getElementById("messageBoxTitle");
+      const messageBoxContent = document.getElementById("messageBoxContent");
+      const messageBoxCloseBtn = document.getElementById("messageBoxCloseBtn");
+
+      // --- Utility Functions ---
+
+      /**
+       * Displays a custom message box to the user.
+       * @param {string} title - The title of the message box.
+       * @param {string} message - The content message.
+       */
+      function showMessageBox(title, message) {
+        messageBoxTitle.textContent = title;
+        // Enhanced message for "Failed to fetch"
+        if (title === "Request Failed" && message.includes("Failed to fetch")) {
+          messageBoxContent.innerHTML = `${message}<br><br><strong>Possible reasons:</strong>
+                <ul class="text-left mt-2 list-disc list-inside">
+                    <li>Network issue.</li>
+                    <li>The URL is not a valid API endpoint (it might be a website URL).</li>
+                    <li>CORS policy blocking the request (server needs to allow cross-origin requests).</li>
+                    <li>Incorrect protocol (<code>http://</code> vs <code>https://</code>).</li>
+                    <li>The server is down or unreachable.</li>
+                    <li>The API endpoint requires authentication or specific headers.</li>
+                </ul>
+                <p class="mt-2">Ensure you are targeting an actual API endpoint that returns structured data (like JSON) and allows cross-origin requests.</p>`;
+        } else {
+          messageBoxContent.textContent = message;
+        }
+        messageBoxOverlay.classList.remove("hidden");
+      }
+
+      /**
+       * Hides the custom message box.
+       */
+      messageBoxCloseBtn.addEventListener("click", () => {
+        messageBoxOverlay.classList.add("hidden");
+      });
+
+      /**
+       * Formats a JSON string for display.
+       * @param {string} jsonString - The JSON string to format.
+       * @returns {string} - Pretty-printed JSON or original string if invalid.
+       */
+      function formatJson(jsonString) {
+        try {
+          const obj = JSON.parse(jsonString);
+          return JSON.stringify(obj, null, 2);
+        } catch (e) {
+          return jsonString; // Return original if not valid JSON
+        }
+      }
+
+      /**
+       * Parses headers from a JSON string in a textarea.
+       * @param {string} headersString - The string from the headers textarea.
+       * @returns {Object} - Parsed headers object.
+       */
+      function parseHeaders(headersString) {
+        try {
+          if (!headersString.trim()) {
+            return {};
+          }
+          return JSON.parse(headersString);
+        } catch (e) {
+          showMessageBox(
+            "Invalid Headers",
+            "Headers must be a valid JSON object."
+          );
+          return null;
+        }
+      }
+
+      /**
+       * Adds a message to the chat display.
+       * @param {string} text - The message text.
+       * @param {string} sender - 'user' or 'ai'.
+       */
+      function addChatMessage(text, sender) {
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("chat-message", sender);
+        // Use innerHTML for messages that contain HTML (like links)
+        messageDiv.innerHTML = text;
+        chatMessagesDiv.appendChild(messageDiv);
+        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll to bottom
+      }
+
+      /**
+       * Displays a loading indicator in the chat.
+       * @returns {HTMLElement} The loading indicator element.
+       */
+      function showChatLoading() {
+        const loadingDiv = document.createElement("div");
+        loadingDiv.classList.add("loading-indicator", "ai");
+        loadingDiv.innerHTML =
+          '<div class="spinner"></div><span>Thinking...</span>';
+        chatMessagesDiv.appendChild(loadingDiv);
+        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+        return loadingDiv;
+      }
+
+      /**
+       * Removes a loading indicator from the chat.
+       * @param {HTMLElement} loadingElement - The loading indicator element to remove.
+       */
+      function hideChatLoading(loadingElement) {
+        if (loadingElement && loadingElement.parentNode) {
+          loadingElement.parentNode.removeChild(loadingElement);
+        }
+      }
+
+      /**
+       * Displays a loading indicator on the send request button.
+       */
+      function showSendButtonLoading() {
+        sendRequestBtn.disabled = true;
+        sendRequestBtn.innerHTML = '<div class="spinner"></div> Sending...';
+      }
+
+      /**
+       * Hides the loading indicator on the send request button.
+       */
+      function hideSendButtonLoading() {
+        sendRequestBtn.disabled = false;
+        sendRequestBtn.innerHTML =
+          '<i class="fas fa-paper-plane"></i> Send Request';
+      }
+
+      // --- API Request Logic ---
+
+      sendRequestBtn.addEventListener("click", async () => {
+        const method = methodSelect.value;
+        const url = urlInput.value.trim();
+        const headers = parseHeaders(headersTextarea.value);
+        const body = bodyTextarea.value.trim();
+
+        if (!url) {
+          showMessageBox(
+            "Missing URL",
+            "Please enter a URL for the API request."
+          );
+          return;
+        }
+        if (!headers) {
+          // parseHeaders returns null on error
+          return;
+        }
+
+        let requestBody = null;
+        if (body) {
+          try {
+            requestBody = JSON.parse(body);
+          } catch (e) {
+            showMessageBox(
+              "Invalid Body",
+              "Request body must be a valid JSON object."
+            );
+            return;
+          }
+        }
+
+        showSendButtonLoading();
+        responseStatusDiv.textContent = "Sending request...";
+        responseStatusDiv.className = "response-status info";
+        responseBodyPre.textContent = "";
+
+        try {
+          const options = {
+            method: method,
+            headers: new Headers(headers),
+          };
+
+          if (
+            requestBody &&
+            (method === "POST" || method === "PUT" || method === "PATCH")
+          ) {
+            options.body = JSON.stringify(requestBody);
+          }
+
+          const startTime = performance.now();
+          const response = await fetch(url, options);
+          const endTime = performance.now();
+          const timeTaken = (endTime - startTime).toFixed(2);
+
+          const responseContentType = response.headers.get("Content-Type");
+          let responseData;
+
+          if (
+            responseContentType &&
+            responseContentType.includes("application/json")
+          ) {
+            responseData = await response.json();
+            responseBodyPre.textContent = formatJson(
+              JSON.stringify(responseData)
+            );
+          } else {
+            responseData = await response.text();
+            responseBodyPre.textContent = responseData;
+          }
+
+          responseStatusDiv.textContent = `Status: ${response.status} ${response.statusText} (${timeTaken}ms)`;
+          if (response.ok) {
+            responseStatusDiv.classList.remove("error", "info");
+            responseStatusDiv.classList.add("success");
+          } else {
+            responseStatusDiv.classList.remove("success", "info");
+            responseStatusDiv.classList.add("error");
+          }
+        } catch (error) {
+          // Modified error message for clarity
+          responseStatusDiv.textContent = `Error: ${error.message}`;
+          responseStatusDiv.classList.remove("success", "info");
+          responseStatusDiv.classList.add("error");
+          responseBodyPre.textContent =
+            "Failed to fetch. Check console for details.";
+          showMessageBox(
+            "Request Failed",
+            `Could not send request: ${error.message}. This often happens if the URL is not a valid API endpoint, or due to network/CORS issues.`
+          );
+        } finally {
+          hideSendButtonLoading();
+        }
+      });
+
+      // --- Clear Form Logic ---
+      clearFormBtn.addEventListener("click", () => {
+        resetForm();
+      });
+
+      function resetForm() {
+        methodSelect.value = "GET";
+        urlInput.value = "";
+        headersTextarea.value = JSON.stringify(
+          { "Content-Type": "application/json" },
+          null,
+          2
+        );
+        bodyTextarea.value = "";
+        responseStatusDiv.textContent = "Awaiting request...";
+        responseStatusDiv.className = "response-status info";
+        responseBodyPre.textContent = "";
+        showMessageBox(
+          "Form Cleared",
+          "All request fields have been reset to default."
+        );
+      }
+
+      // --- Copy Response Logic ---
+      copyResponseBtn.addEventListener("click", () => {
+        const textToCopy = responseBodyPre.textContent;
+        if (textToCopy) {
+          // Use a temporary textarea to copy text to clipboard
+          const tempTextArea = document.createElement("textarea");
+          tempTextArea.value = textToCopy;
+          document.body.appendChild(tempTextArea);
+          tempTextArea.select();
+          try {
+            document.execCommand("copy");
+            showMessageBox("Copied!", "Response body copied to clipboard.");
+          } catch (err) {
+            console.error("Failed to copy text: ", err);
+            showMessageBox(
+              "Copy Failed",
+              "Could not copy text to clipboard. Please try manually."
+            );
+          } finally {
+            document.body.removeChild(tempTextArea);
+          }
+        } else {
+          showMessageBox("Nothing to Copy", "The response body is empty.");
+        }
+      });
+
+      // --- Copilot AI Logic ---
+
+      /**
+       * Displays the detailed guidance message for setting the API key.
+       */
+      function showApiKeyGuidance() {
+        addChatMessage(
+          `It looks like your Gemini API Key is not set. To enable AI assistance:
+                <ol>
+                    <li>Get an API Key from <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.</li>
+                    <li>In VS Code, open Settings (<code>Ctrl+,</code> or <code>Cmd+,</code>).</li>
+                    <li>Search for "Postman Lite".</li>
+                    <li>Paste your API Key into the "Gemini Api Key" field.</li>
+                    <li>Restart the Extension Development Host.</li>
+                </ol>
+                `,
+          "ai"
+        );
+        copilotInput.disabled = true; // Keep disabled
+        sendCopilotBtn.disabled = true; // Keep disabled
+      }
+
+      /**
+       * Calls the Gemini API to get AI suggestions.
+       * @param {string} prompt - The user's prompt.
+       * @returns {Promise<string>} - The AI's response text.
+       */
+      async function getCopilotSuggestion(prompt) {
+        if (!geminiApiKey) {
+          showApiKeyGuidance(); // Show guidance if key is missing
+          return "Error: Gemini API Key is not set.";
+        }
+
+        let chatHistory = [];
+        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+        const payload = { contents: chatHistory };
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const result = await response.json();
+
+          if (
+            result.candidates &&
+            result.candidates.length > 0 &&
+            result.candidates[0].content &&
+            result.candidates[0].content.parts &&
+            result.candidates[0].content.parts.length > 0
+          ) {
+            return result.candidates[0].content.parts[0].text;
+          } else {
+            console.error("Unexpected AI response structure:", result);
+            return "Sorry, I could not generate a response. Please try again.";
+          }
+        } catch (error) {
+          console.error("Error calling Gemini API:", error);
+          return "An error occurred while connecting to the AI. Please check your network or API key.";
+        }
+      }
+
+      /**
+       * Parses AI response to update the request form.
+       * Expected AI format (example):
+       * ```json
+       * {
+       * "url": "[https://api.example.com/users](https://api.example.com/users)",
+       * "method": "POST",
+       * "headers": {
+       * "Content-Type": "application/json",
+       * "Authorization": "Bearer YOUR_TOKEN"
+       * },
+       * "body": {
+       * "name": "John Doe",
+       * "email": "john.doe@example.com"
+       * }
+       * }
+       * ```
+       * @param {string} aiText - The raw text response from the AI.
+       */
+      function applyAiSuggestions(aiText) {
+        try {
+          // Attempt to extract JSON from markdown code block
+          const jsonMatch = aiText.match(/```json\n([\s\S]*?)\n```/);
+          let jsonString = jsonMatch ? jsonMatch[1] : aiText; // Fallback to raw text if no code block
+
+          const suggestion = JSON.parse(jsonString);
+
+          if (suggestion.url) {
+            urlInput.value = suggestion.url;
+          }
+          if (suggestion.method) {
+            methodSelect.value = suggestion.method.toUpperCase();
+          }
+          if (suggestion.headers) {
+            headersTextarea.value = JSON.stringify(suggestion.headers, null, 2);
+          }
+          if (suggestion.body) {
+            bodyTextarea.value = JSON.stringify(suggestion.body, null, 2);
+          }
+          addChatMessage(
+            "I've updated the request form based on your command!",
+            "ai"
+          );
+        } catch (e) {
+          console.warn(
+            "AI suggestion could not be parsed as JSON or applied:",
+            aiText,
+            e
+          );
+          addChatMessage(
+            "I received a suggestion from the AI, but it wasn't in a format I could automatically apply to the form. Here's what it said: " +
+              aiText,
+            "ai"
+          );
+        }
+      }
+
+      sendCopilotBtn.addEventListener("click", async () => {
+        const userPrompt = copilotInput.value.trim();
+        if (!userPrompt) {
+          showMessageBox(
+            "Empty Prompt",
+            "Please type something for the Copilot AI."
+          );
+          return;
+        }
+
+        // If API key is not set, show guidance instead of sending request
+        if (!geminiApiKey) {
+          showApiKeyGuidance(); // Show guidance if key is missing
+          return;
+        }
+
+        addChatMessage(userPrompt, "user");
+        copilotInput.value = ""; // Clear input
+
+        const loadingIndicator = showChatLoading();
+
+        const currentRequest = {
+          url: urlInput.value,
+          method: methodSelect.value,
+          headers: headersTextarea.value,
+          body: bodyTextarea.value,
+          responseStatus: responseStatusDiv.textContent,
+          responseBody: responseBodyPre.textContent,
+        };
+
+        // --- REFINED PROMPT FOR DIRECT URL HANDLING & REDUCING QUESTIONS ---
+        let fullPrompt = `You are an AI assistant for an API client.
+            The user wants to perform an action related to an API request.
+            If the user's request contains a URL (e.g., "https://example.com/api" or "https://www.npmjs.com/package/axios"), assume they want to generate a request for that URL.
+            If the URL looks like a common website (e.g., npmjs.com, github.com, docs.google.com), infer the corresponding public API endpoint if one commonly exists for that service (e.g., for npmjs.com, use registry.npmjs.org; for github.com, use api.github.com).
+            If only a URL is provided, default to a GET method with no headers or body.
+            If other details like method, headers, or body are explicitly mentioned, incorporate them.
+            Your response MUST be a JSON object wrapped in a markdown code block (e.g., \`\`\`json{...}\`\`\`).
+            The JSON object should contain the following keys: "method" (string, e.g., "GET", "POST"), "url" (string), "headers" (JSON object), and "body" (JSON object or string, or null if no body).
+            If the user asks for an explanation, test suggestion, or general advice (and not a request generation), provide a plain text response.
+
+            User's request: "${userPrompt}"
+
+            Current API request context (for reference, if applicable):
+            URL: ${currentRequest.url || "Not set"}
+            Method: ${currentRequest.method || "Not set"}
+            Headers: ${currentRequest.headers || "Not set"}
+            Body: ${currentRequest.body || "Not set"}
+            Last Response Status: ${
+              currentRequest.responseStatus || "No response yet"
+            }
+            Last Response Body: ${
+              currentRequest.responseBody || "No response yet"
+            }
+
+            Examples of expected JSON output for request generation:
+            \`\`\`json
+            {
+              "method": "POST",
+              "url": "https://jsonplaceholder.typicode.com/posts",
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "title": "foo",
+                "body": "bar",
+                "userId": 1
+              }
+            }
+            \`\`\`
+            \`\`\`json
+            {
+              "method": "GET",
+              "url": "https://api.github.com/users/octocat",
+              "headers": {}
+            }
+            \`\`\`
+            \`\`\`json
+            {
+              "method": "GET",
+              "url": "https://registry.npmjs.org/@karthicraja/react-native-simple-table",
+              "headers": {}
+            }
+            \`\`\`
+            `;
+
+        // If the user's prompt suggests test generation or explanation, adjust the prompt accordingly
+        if (
+          userPrompt.toLowerCase().includes("test") ||
+          userPrompt.toLowerCase().includes("assertion")
+        ) {
+          fullPrompt = `You are an AI assistant for an API client. The user wants a test suggestion. Provide a JavaScript test script for a Postman-like environment.
+                User's request: "${userPrompt}"
+                Current API request context:
+                URL: ${currentRequest.url || "Not set"}
+                Method: ${currentRequest.method || "Not set"}
+                Last Response Status: ${
+                  currentRequest.responseStatus || "No response yet"
+                }
+                Last Response Body: ${
+                  currentRequest.responseBody || "No response yet"
+                }
+
+                Example test for 200 OK status and JSON body content:
+                \`\`\`javascript
+                // Check if status code is 200 OK
+                if (pm.response.code === 200) {
+                    console.log("Status code is 200 OK.");
+                } else {
+                    console.error("Status code is not 200 OK. Got: " + pm.response.code);
+                }
+
+                // Check if response is JSON and has a specific property
+                try {
+                    const responseJson = pm.response.json();
+                    if (responseJson && typeof responseJson.id === 'number') {
+                        console.log("Response is valid JSON and contains a numeric 'id'.");
+                    } else {
+                        console.error("Response is not valid JSON or 'id' is missing/invalid.");
+                    }
+                } catch (e) {
+                    console.error("Failed to parse response as JSON:", e);
+                }
+                \`\`\`
+                `;
+        } else if (
+          userPrompt.toLowerCase().includes("explain") ||
+          userPrompt.toLowerCase().includes("troubleshoot")
+        ) {
+          fullPrompt = `You are an AI assistant for an API client. The user wants an explanation or troubleshooting advice.
+                 User's request: "${userPrompt}"
+                 Current API request context:
+                 URL: ${currentRequest.url || "Not set"}
+                 Method: ${currentRequest.method || "Not set"}
+                 Last Response Status: ${
+                   currentRequest.responseStatus || "No response yet"
+                 }
+                 Last Response Body: ${
+                   currentRequest.responseBody || "No response yet"
+                 }
+
+                 Provide a concise, plain text explanation.
+                 Example: "A 404 Not Found error means the server could not find the requested resource. Check the URL for typos or if the resource exists on the server."
+                 `;
+        }
+
+        const aiResponse = await getCopilotSuggestion(fullPrompt);
+        hideChatLoading(loadingIndicator);
+
+        // Attempt to apply AI suggestions if it's a structured JSON response
+        if (aiResponse && aiResponse.includes("```json")) {
+          // Check if aiResponse is not empty before checking for json block
+          applyAiSuggestions(aiResponse);
+        } else if (aiResponse) {
+          // If there's a response but not JSON, just add it to chat
+          addChatMessage(aiResponse, "ai");
+        }
+      });
+
+      copilotInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          sendCopilotBtn.click();
+        }
+      });
+
+      // --- VS Code Webview Communication for API Key ---
+
+      // Listen for messages from the extension host
+      window.addEventListener("message", (event) => {
+        const message = event.data; // The JSON data sent from the extension host
+
+        switch (message.command) {
+          case "sendGeminiApiKey":
+            geminiApiKey = message.apiKey;
+            hideChatLoading(apiKeyLoadingIndicator); // Hide the loading indicator
+            if (geminiApiKey) {
+              addChatMessage(
+                "Gemini AI is ready! You can now ask for assistance.",
+                "ai"
+              );
+              copilotInput.disabled = false; // Enable input
+              sendCopilotBtn.disabled = false; // Enable button
+              // Add sample requests to chat after AI is ready
+              addChatMessage(
+                `
+                            <p>You can try these sample requests:</p>
+                            <ul>
+                                <li><span class="sample-request-link" data-url="https://jsonplaceholder.typicode.com/posts/1" data-method="GET">GET: JSONPlaceholder Post</span></li>
+                                <li><span class="sample-request-link" data-url="https://registry.npmjs.org/axios" data-method="GET">GET: NPM 'axios' package info</span></li>
+                                <li><span class="sample-request-link" data-url="https://api.github.com/repos/octocat/Spoon-Knife" data-method="GET">GET: GitHub 'Spoon-Knife' repo info</span></li>
+                                <li><span class="sample-request-link" data-url="https://jsonplaceholder.typicode.com/posts" data-method="POST" data-body='{"title": "My New Post", "body": "This is some content.", "userId": 1}'>POST: JSONPlaceholder New Post</span></li>
+                            </ul>
+                            <p>Click on any of them to auto-fill the request form!</p>
+                        `,
+                "ai"
+              );
+
+              // Attach event listeners to sample links
+              document
+                .querySelectorAll(".sample-request-link")
+                .forEach((link) => {
+                  link.addEventListener("click", function () {
+                    urlInput.value = this.dataset.url || "";
+                    methodSelect.value = this.dataset.method || "GET";
+                    headersTextarea.value = JSON.stringify(
+                      { "Content-Type": "application/json" },
+                      null,
+                      2
+                    );
+                    bodyTextarea.value = this.dataset.body
+                      ? JSON.stringify(JSON.parse(this.dataset.body), null, 2)
+                      : "";
+                    addChatMessage(
+                      `Auto-filled request: ${this.textContent}`,
+                      "ai"
+                    );
+                  });
+                });
+            } else {
+              // Display the detailed guidance message directly in the chat
+              showApiKeyGuidance();
+            }
+            break;
+        }
+      });
+
+      // Request the API key from the extension host when the webview loads
+      vscode.postMessage({ command: "getGeminiApiKey" });
+
+      // Initial setup for headers and body textareas
+      headersTextarea.value = JSON.stringify(
+        { "Content-Type": "application/json" },
+        null,
+        2
+      );
+      bodyTextarea.value = JSON.stringify(
+        { message: "Hello from Postman Lite!" },
+        null,
+        2
+      );
+    </script>
+  </body>
+</html>

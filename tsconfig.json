@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "dist",
+    "lib": [
+      "es6"
+    ],
+    "sourceMap": true,
+    "rootDir": "src",
+    "strict": true, /* enable all strict type-checking options */
+    "esModuleInterop": true,
+    "skipLibCheck": true, /* Skip type checking all .d.ts files. */
+    "forceConsistentCasingInFileNames": true,
+    "types": [
+      "node",
+      "mocha" // <--- ENSURE "mocha" IS HERE
+    ]
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".vscode-test"
+  ]
+}

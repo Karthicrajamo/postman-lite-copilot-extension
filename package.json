@@ -1,0 +1,56 @@
+{
+  "name": "postman-lite-copilot-extension",
+  "displayName": "Postman Lite with Copilot Extension",
+  "description": "A lightweight Postman alternative with AI assistance.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:postman-lite-copilot-extension.openPostmanLite"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "postman-lite-copilot-extension.openPostmanLite",
+        "title": "Open Postman Lite"
+      }
+    ],
+    "configuration": {
+      "title": "Postman Lite with Copilot Settings",
+      "properties": {
+        "postmanLite.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your Google Gemini API Key for Copilot AI assistance. Get one from aistudio.google.com/app/apikey"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "dev": "webpack --mode development --watch"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^18.17.1",
+    "@typescript-eslint/eslint-plugin": "^6.4.1",
+    "@typescript-eslint/parser": "^6.4.1",
+    "eslint": "^8.47.0",
+    "typescript": "^5.1.6",
+    "@vscode/test-electron": "^2.3.4",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "ts-loader": "^9.4.4"
+  }
+}
