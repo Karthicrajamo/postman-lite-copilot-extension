@@ -1,542 +1,544 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Postman Lite with Copilot</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for icons -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-      body {
-        font-family: "Inter", sans-serif;
-        background-color: #f0f2f5;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        min-height: 100vh; /* Ensures body takes at least full viewport height */
-        padding: 20px;
-        box-sizing: border-box;
-      }
-      .container {
-        display: flex;
-        flex-direction: column; /* Main container is column to stack sections */
-        gap: 20px;
-        width: 100%;
-        max-width: 1200px;
-        background-color: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        padding: 24px;
-        /* Removed fixed height, let it grow with content */
-      }
-      .main-content-wrapper {
-        display: flex;
-        flex-direction: column; /* Stack client and copilot on small screens */
-        gap: 20px;
-        flex-grow: 1; /* Allow this wrapper to take available space */
-        min-height: 0; /* Important for flex items to shrink below their content size */
-      }
-      @media (min-width: 1024px) {
-        /* Flex row for larger screens */
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh; /* Ensures body takes at least full viewport height */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            display: flex;
+            flex-direction: column; /* Main container is column to stack sections */
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            /* Removed fixed height, let it grow with content */
+        }
         .main-content-wrapper {
-          flex-direction: row;
-          flex-grow: 1; /* Allow side-by-side sections to grow */
+            display: flex;
+            flex-direction: column; /* Stack client and copilot on small screens */
+            gap: 20px;
+            flex-grow: 1; /* Allow this wrapper to take available space */
+            min-height: 0; /* Important for flex items to shrink below their content size */
         }
-      }
-      .api-client-section,
-      .copilot-section {
-        flex: 1;
-        padding: 20px;
-        border-radius: 10px;
-        background-color: #f9fafb;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-        min-width: 300px; /* Ensure sections don't get too small */
-        display: flex; /* Make them flex containers */
-        flex-direction: column; /* Stack their children vertically */
-        min-height: 0; /* Allow them to shrink if content is too large */
-      }
-      .section-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 15px;
-        border-bottom: 2px solid #e2e8f0;
-        padding-bottom: 10px;
-        flex-shrink: 0; /* Prevent title from shrinking */
-      }
-      .responseApi {
-        margin-top: 24px; /* Adjusted margin-top for proper spacing */
-      }
-      .input-group {
-        margin-bottom: 15px;
-        flex-shrink: 0; /* Prevent input groups from shrinking */
-      }
-      .input-group label {
-        display: block;
-        font-weight: 500;
-        color: #4a5568;
-        margin-bottom: 5px;
-      }
-      .input-group input,
-      .input-group select,
-      .input-group textarea {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #cbd5e0;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        color: #2d3748;
-        background-color: white;
-        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-      }
-      .input-group input:focus,
-      .input-group select:focus,
-      .input-group textarea:focus {
-        outline: none;
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-      }
-      .button-group {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
-        flex-shrink: 0; /* Prevent button group from shrinking */
-      }
-      .send-button,
-      .clear-button {
-        flex: 1; /* Allow buttons to grow */
-        min-width: 150px; /* Ensure buttons are not too small */
-        padding: 12px 25px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
-        border: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-      }
-      .send-button {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        color: white;
-      }
-      .send-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(99, 102, 241, 0.4);
-      }
-      .send-button:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 5px rgba(99, 102, 241, 0.2);
-      }
-      .clear-button {
-        background-color: #e2e8f0;
-        color: #4a5568;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      }
-      .clear-button:hover {
-        background-color: #cbd5e0;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-      }
-      .clear-button:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
-      }
-
-      .response-area {
-        background-color: #ffffff; /* Changed to white */
-        color: #333333; /* Changed to black/dark gray */
-        padding: 15px;
-        border-radius: 8px;
-        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
-          Courier, monospace;
-        font-size: 0.9rem;
-        min-height: 150px;
-        max-height: 300px; /* Fixed height with scroll */
-        overflow-y: auto;
-        border: 1px solid #cbd5e0; /* Lighter border for light background */
-        position: relative; /* For positioning copy button */
-        width: 100%; /* Ensure it takes full width when stacked */
-        display: flex; /* Use flexbox for internal layout */
-        flex-direction: column; /* Stack status, content, and button */
-        flex-shrink: 0; /* Prevent response area from shrinking */
-      }
-      .response-status {
-        font-weight: 600;
-        margin-bottom: 10px;
-        padding-bottom: 5px;
-        border-bottom: 1px dashed #a0aec0; /* Adjusted for contrast */
-        flex-shrink: 0; /* Prevent status from shrinking */
-      }
-      .response-status.success {
-        color: #2f855a;
-      } /* Darker green */
-      .response-status.error {
-        color: #c53030;
-      } /* Darker red */
-      .response-status.info {
-        color: #d69e2e;
-      } /* Darker yellow */
-
-      .response-content {
-        flex-grow: 1; /* Allow content to take available height */
-        overflow-y: auto; /* Make content scrollable */
-        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
-          Courier, monospace;
-        font-size: 0.9rem;
-        white-space: pre; /* Preserve whitespace and line breaks for code */
-        word-break: break-all;
-        padding-top: 10px; /* Space below status */
-      }
-      .response-line {
-        display: flex; /* Use flex for line number and text */
-        line-height: 1.4; /* Adjust line height for readability */
-      }
-      .response-line .line-number {
-        color: #a0aec0; /* Lighter gray for numbers */
-        margin-right: 15px;
-        user-select: none; /* Prevent selecting line numbers */
-        text-align: right;
-        min-width: 40px; /* Ensure enough space for numbers (e.g., up to 9999 lines) */
-        flex-shrink: 0; /* Don't shrink line numbers */
-      }
-      .response-line .line-text {
-        flex-grow: 1; /* Allow text to take remaining space */
-        word-break: break-all; /* Break long words */
-        white-space: pre-wrap; /* Wrap text within the content area */
-      }
-
-      .copy-button {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background-color: rgba(0, 0, 0, 0.1);
-        color: #4a5568;
-        padding: 5px 8px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        font-size: 0.8rem;
-        width: 100px;
-        transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-      }
-      .copy-button:hover {
-        background-color: rgba(0, 0, 0, 0.2);
-        color: #2d3748;
-      }
-
-      /* Copilot Chat Styling */
-      .copilot-section {
-        /* Removed min-height from copilot-section directly */
-      }
-      .chat-messages {
-        flex-grow: 1;
-        overflow-y: auto; /* This makes the chat messages scrollable */
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 15px;
-        background-color: white;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        min-height: 0; /* Crucial for flex-grow to work and allow shrinking */
-        max-height: 700px;
-      }
-      .chat-message {
-        max-width: 90%;
-        padding: 10px 15px;
-        border-radius: 15px;
-        word-wrap: break-word;
-        line-height: 1.5;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-      }
-      .chat-message.user {
-        background-color: #6366f1;
-        color: white;
-        align-self: flex-end;
-        border-bottom-right-radius: 2px;
-      }
-      .chat-message.ai {
-        background-color: #e0e7ff;
-        color: #333;
-        align-self: flex-start;
-        border-bottom-left-radius: 2px;
-      }
-      .chat-message.ai a {
-        color: #4f46e5;
-        text-decoration: underline;
-      }
-      .chat-message.ai .sample-request-link {
-        cursor: pointer;
-        color: #4f46e5;
-        text-decoration: underline;
-        font-weight: 500;
-      }
-      .chat-message.ai .sample-request-link:hover {
-        color: #6366f1;
-      }
-
-      .chat-input-area {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-        flex-shrink: 0; /* Prevent input area from shrinking */
-      }
-      .chat-input-area input {
-        flex-grow: 1;
-        padding: 10px 15px;
-        border: 1px solid #cbd5e0;
-        border-radius: 8px;
-        font-size: 0.95rem;
-      }
-      .chat-input-area button {
-        background-color: #4f46e5;
-        color: white;
-        padding: 10px 15px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        transition: background-color 0.2s ease-in-out;
-      }
-      .chat-input-area button:hover {
-        background-color: #4338ca;
-      }
-      .loading-indicator {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #6366f1;
-        font-weight: 500;
-      }
-      .loading-indicator .spinner {
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #6366f1;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
+        @media (min-width: 1024px) { /* Flex row for larger screens */
+            .main-content-wrapper {
+                flex-direction: row;
+                flex-grow: 1; /* Allow side-by-side sections to grow */
+            }
         }
-        100% {
-          transform: rotate(360deg);
+        .api-client-section, .copilot-section {
+            flex: 1;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f9fafb;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            min-width: 300px; /* Ensure sections don't get too small */
+            display: flex; /* Make them flex containers */
+            flex-direction: column; /* Stack their children vertically */
+            min-height: 0; /* Allow them to shrink if content is too large */
         }
-      }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            flex-shrink: 0; /* Prevent title from shrinking */
+        }
+        .responseApi {
+            margin-top: 24px; /* Adjusted margin-top for proper spacing */
+        }
+        .input-group {
+            margin-bottom: 15px;
+            flex-shrink: 0; /* Prevent input groups from shrinking */
+        }
+        .input-group label {
+            display: block;
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #2d3748;
+            background-color: white;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+            flex-shrink: 0; /* Prevent button group from shrinking */
+        }
+        .send-button, .clear-button {
+            flex: 1; /* Allow buttons to grow */
+            min-width: 150px; /* Ensure buttons are not too small */
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .send-button {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(99, 102, 241, 0.4);
+        }
+        .send-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(99, 102, 241, 0.2);
+        }
+        .clear-button {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        .clear-button:hover {
+            background-color: #cbd5e0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        .clear-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
 
-      /* Message Box Styling */
-      .message-box-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-      .message-box {
-        background-color: white;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        text-align: center;
-        max-width: 400px;
-        width: 90%;
-        transform: scale(0.95);
-        animation: scaleIn 0.2s ease-out forwards;
-      }
-      @keyframes scaleIn {
-        from {
-          transform: scale(0.8);
-          opacity: 0;
+        .response-area {
+            background-color: #ffffff; /* Changed to white */
+            color: #333333; /* Changed to black/dark gray */
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 0.9rem;
+            min-height: 150px;
+            max-height: 300px; /* Fixed height with scroll */
+            overflow-y: auto;
+            border: 1px solid #cbd5e0; /* Lighter border for light background */
+            position: relative; /* For positioning copy button */
+            width: 100%; /* Ensure it takes full width when stacked */
+            display: flex; /* Use flexbox for internal layout */
+            flex-direction: column; /* Stack status, content, and button */
+            flex-shrink: 0; /* Prevent response area from shrinking */
         }
-        to {
-          transform: scale(1);
-          opacity: 1;
+        .response-status {
+            font-weight: 600;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #a0aec0; /* Adjusted for contrast */
+            flex-shrink: 0; /* Prevent status from shrinking */
         }
-      }
-      .message-box h3 {
-        font-size: 1.5rem;
-        color: #333;
-        margin-bottom: 15px;
-      }
-      .message-box p {
-        color: #555;
-        margin-bottom: 25px;
-        line-height: 1.6;
-      }
-      .message-box button {
-        background-color: #6366f1;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        font-weight: 600;
-        transition: background-color 0.2s ease-in-out;
-      }
-      .message-box button:hover {
-        background-color: #4f46e5;
-      }
+        .response-status.success { color: #2f855a; } /* Darker green */
+        .response-status.error { color: #c53030; } /* Darker red */
+        .response-status.info { color: #d69e2e; } /* Darker yellow */
+
+        .response-content {
+            flex-grow: 1; /* Allow content to take available height */
+            overflow-y: auto; /* Make content scrollable */
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 0.9rem;
+            white-space: pre; /* Preserve whitespace and line breaks for code */
+            word-break: break-all;
+            padding-top: 10px; /* Space below status */
+        }
+        .response-line {
+            display: flex; /* Use flex for line number and text */
+            line-height: 1.4; /* Adjust line height for readability */
+        }
+        .response-line .line-number {
+            color: #a0aec0; /* Lighter gray for numbers */
+            margin-right: 15px;
+            user-select: none; /* Prevent selecting line numbers */
+            text-align: right;
+            min-width: 40px; /* Ensure enough space for numbers (e.g., up to 9999 lines) */
+            flex-shrink: 0; /* Don't shrink line numbers */
+        }
+        .response-line .line-text {
+            flex-grow: 1; /* Allow text to take remaining space */
+            word-break: break-all; /* Break long words */
+            white-space: pre-wrap; /* Wrap text within the content area */
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.1);
+            color: #4a5568;
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            width:100px;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+        .copy-button:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: #2d3748;
+        }
+
+
+        /* Copilot Chat Styling */
+        .copilot-section {
+            /* Removed min-height from copilot-section directly */
+        }
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto; /* This makes the chat messages scrollable */
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 0; /* Crucial for flex-grow to work and allow shrinking */
+        }
+        .chat-message {
+            max-width: 90%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            word-wrap: break-word;
+            line-height: 1.5;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        .chat-message.user {
+            background-color: #6366f1;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+        .chat-message.ai {
+            background-color: #e0e7ff;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+        .chat-message.ai a {
+            color: #4f46e5;
+            text-decoration: underline;
+        }
+        .chat-message.ai .sample-request-link {
+            cursor: pointer;
+            color: #4f46e5;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        .chat-message.ai .sample-request-link:hover {
+            color: #6366f1;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-shrink: 0; /* Prevent input area from shrinking */
+        }
+        .chat-input-area input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        .chat-input-area button {
+            background-color: #4f46e5;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .chat-input-area button:hover {
+            background-color: #4338ca;
+        }
+        .loading-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6366f1;
+            font-weight: 500;
+        }
+        .loading-indicator .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #6366f1;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Message Box Styling */
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .message-box {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: scale(0.95);
+            animation: scaleIn 0.2s ease-out forwards;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .message-box h3 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .message-box p {
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        .message-box button {
+            background-color: #6366f1;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .message-box button:hover {
+            background-color: #4f46e5;
+        }
+
+        /* New styles for animated heading */
+        .app-heading {
+            font-size: 22px; /* Larger font size */
+            font-weight: 800; /* Even bolder */
+            color: #1a202c; /* Darker text color, but will be overridden by gradient */
+            margin-bottom: 40px; /* More space below heading */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 25px; /* Increased space between icon and text */
+            text-shadow: 4px 4px 12px rgba(0, 0, 0, 0.3); /* Stronger, more defined text shadow */
+            background: linear-gradient(90deg, #4299e1, #805ad5, #d53f8c); /* Vibrant blue-purple-pink gradient */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: gradient-shift 7s ease infinite alternate; /* Slightly slower animation for smoothness */
+            letter-spacing: -0.06em; /* Tighter letter spacing for a modern, impactful look */
+            transition: transform 0.3s ease-in-out; /* Smooth transition for hover effect */
+        }
+
+        .app-heading:hover {
+            transform: scale(1.02); /* Slight scale on hover for interactivity */
+        }
+
+        .app-icon {
+            font-size:24px; /* Significantly larger icon size */
+            color: #FF8C42; /* Vibrant orange for better visibility */
+            /* animation: bounce-scale 2.8s infinite ease-in-out; Slightly slower bounce for elegance */
+            filter: drop-shadow(0 10px 20px rgba(255, 140, 66, 0.6)); /* More pronounced drop shadow matching icon color */
+            transform-origin: center bottom; /* Ensure it bounces from its base */
+        }
+
+        @keyframes bounce-scale {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-20px) scale(1.2); /* Higher bounce and more scale for impact */
+            }
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div class="container">
-      <div class="main-content-wrapper">
-        <!-- API Client Section -->
-        <div class="api-client-section">
-          <h2 class="section-title">API Request</h2>
+        <!-- Main Application Title with Icon -->
+        <!-- <h1 class="app-heading">
+            <i class="fas fa-rocket app-icon"></i> POSTMAN LITE WITH COPILOT
+        </h1> -->
 
-          <div class="input-group">
-            <label for="method">Method:</label>
-            <select id="method" class="w-full p-2 border rounded-md">
-              <option value="GET">GET</option>
-              <option value="POST">POST</option>
-              <option value="PUT">PUT</option>
-              <option value="DELETE">DELETE</option>
-              <option value="PATCH">PATCH</option>
-            </select>
-          </div>
+        <div class="main-content-wrapper">
+            <!-- API Client Section -->
+            <div class="api-client-section">
+                <h2 class="section-title">API Request</h2>
 
-          <div class="input-group">
-            <label for="url">URL:</label>
-            <input
-              type="text"
-              id="url"
-              placeholder="Enter API URL (e.g., https://jsonplaceholder.typicode.com/posts?userId=1&id=1)"
-            />
-          </div>
+                <div class="input-group">
+                    <label for="method">Method:</label>
+                    <select id="method" class="w-full p-2 border rounded-md">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="PATCH">PATCH</option>
+                    </select>
+                </div>
 
-          <div class="input-group">
-            <label for="headers">Headers (JSON):</label>
-            <textarea
-              id="headers"
-              rows="4"
-              placeholder='{"Content-Type": "application/json"}'
-              class="resize-y"
-            ></textarea>
-          </div>
+                <div class="input-group">
+                    <label for="url">URL:</label>
+                    <input type="text" id="url" placeholder="Enter API URL (e.g., https://jsonplaceholder.typicode.com/posts?userId=1&id=1)">
+                </div>
 
-          <div class="input-group">
-            <label for="body">Body (JSON):</label>
-            <textarea
-              id="body"
-              rows="6"
-              placeholder='{"key": "value"}'
-              class="resize-y"
-            ></textarea>
-          </div>
+                <div class="input-group">
+                    <label for="headers">Headers (JSON):</label>
+                    <textarea id="headers" rows="4" placeholder='{"Content-Type": "application/json"}' class="resize-y"></textarea>
+                </div>
 
-          <div class="button-group">
-            <button id="sendRequestBtn" class="send-button">
-              <i class="fas fa-paper-plane"></i> Send Request
-            </button>
-            <button id="clearFormBtn" class="clear-button">
-              <i class="fas fa-eraser"></i> Clear
-            </button>
-          </div>
-        </div>
+                <div class="input-group">
+                    <label for="body">Body (JSON):</label>
+                    <textarea id="body" rows="6" placeholder='{"key": "value"}' class="resize-y"></textarea>
+                </div>
 
-        <!-- Copilot Extension Section -->
-        <div class="copilot-section">
-          <h2 class="section-title">Copilot AI Assistant</h2>
-          <div id="chatMessages" class="chat-messages">
-            <!-- Initial messages will be added by JS -->
-            <div class="chat-message ai loading-indicator" id="apiKeyLoading">
-              <div class="spinner"></div>
-              <span>Loading AI Assistant...</span>
+                <div class="button-group">
+                    <button id="sendRequestBtn" class="send-button">
+                        <i class="fas fa-paper-plane"></i> Send Request
+                    </button>
+                    <button id="clearFormBtn" class="clear-button">
+                        <i class="fas fa-eraser"></i> Clear
+                    </button>
+                </div>
             </div>
-          </div>
-          <div class="chat-input-area">
-            <input
-              type="text"
-              id="copilotInput"
-              placeholder="Ask me anything about your API..."
-              disabled
-            />
-            <button id="sendCopilotBtn" disabled>
-              <i class="fas fa-comment-dots"></i> Send
-            </button>
-          </div>
-        </div>
-      </div>
 
-      <h2 class="section-title responseApi">API Response</h2>
-      <div id="responseDisplay" class="response-area">
-        <div id="responseStatus" class="response-status info">
-          Awaiting request...
+            <!-- Copilot Extension Section -->
+            <div class="copilot-section">
+                <h2 class="section-title">Copilot AI Assistant</h2>
+                <div id="chatMessages" class="chat-messages">
+                    <!-- Initial messages will be added by JS -->
+                    <div class="chat-message ai loading-indicator" id="apiKeyLoading">
+                        <div class="spinner"></div><span>Loading AI Assistant...</span>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="copilotInput" placeholder="Ask me anything about your API..." disabled>
+                    <button id="sendCopilotBtn" disabled>
+                        <i class="fas fa-comment-dots"></i> Send
+                    </button>
+                </div>
+            </div>
         </div>
-        <div id="responseContent" class="response-content"></div>
-        <!-- New container for numbered lines -->
-        <button
-          id="copyResponseBtn"
-          class="copy-button"
-          title="Copy response to clipboard"
-        >
-          <i class="fas fa-copy"></i> Copy
-        </button>
-      </div>
+
+        <h2 class="section-title responseApi">API Response</h2>
+        <div id="responseDisplay" class="response-area">
+            <div id="responseStatus" class="response-status info">Awaiting request...</div>
+            <div id="responseContent" class="response-content"></div> <!-- New container for numbered lines -->
+            <button id="copyResponseBtn" class="copy-button" title="Copy response to clipboard">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        </div>
+
+        <!-- Copyright Notice -->
+        <div class="copyright-notice text-center text-sm text-gray-500 mt-8 p-4 border-t border-gray-200 rounded-b-lg">
+            &copy; 2025 Karthic Raja - Postman Lite with Copilot. All rights reserved.
+        </div>
     </div>
 
     <!-- Message Box Container -->
     <div id="messageBoxOverlay" class="message-box-overlay hidden">
-      <div class="message-box">
-        <h3 id="messageBoxTitle"></h3>
-        <p id="messageBoxContent"></p>
-        <button id="messageBoxCloseBtn">OK</button>
-      </div>
+        <div class="message-box">
+            <h3 id="messageBoxTitle"></h3>
+            <p id="messageBoxContent"></p>
+            <button id="messageBoxCloseBtn">OK</button>
+        </div>
     </div>
 
     <script type="module">
-      // @ts-ignore
-      const vscode = acquireVsCodeApi();
+        // @ts-ignore
+        const vscode = acquireVsCodeApi();
 
-      let geminiApiKey = ""; // This will be set by the extension host
+        let geminiApiKey = ''; // This will be set by the extension host
+        let initialCopilotMessagesDisplayed = false; // New flag to prevent duplicate initial AI messages
 
-      // DOM Elements
-      const methodSelect = document.getElementById("method");
-      const urlInput = document.getElementById("url");
-      const headersTextarea = document.getElementById("headers");
-      const bodyTextarea = document.getElementById("body");
-      const sendRequestBtn = document.getElementById("sendRequestBtn");
-      const clearFormBtn = document.getElementById("clearFormBtn");
-      const responseStatusDiv = document.getElementById("responseStatus");
-      const responseContentDiv = document.getElementById("responseContent");
-      const copyResponseBtn = document.getElementById("copyResponseBtn");
+        // DOM Elements
+        const methodSelect = document.getElementById('method');
+        const urlInput = document.getElementById('url');
+        const headersTextarea = document.getElementById('headers');
+        const bodyTextarea = document.getElementById('body');
+        const sendRequestBtn = document.getElementById('sendRequestBtn');
+        const clearFormBtn = document.getElementById('clearFormBtn');
+        const responseStatusDiv = document.getElementById('responseStatus');
+        const responseContentDiv = document.getElementById('responseContent');
+        const copyResponseBtn = document.getElementById('copyResponseBtn');
 
-      const chatMessagesDiv = document.getElementById("chatMessages");
-      const copilotInput = document.getElementById("copilotInput");
-      const sendCopilotBtn = document.getElementById("sendCopilotBtn");
-      const apiKeyLoadingIndicator = document.getElementById("apiKeyLoading");
+        const chatMessagesDiv = document.getElementById('chatMessages');
+        const copilotInput = document.getElementById('copilotInput');
+        const sendCopilotBtn = document.getElementById('sendCopilotBtn');
+        const apiKeyLoadingIndicator = document.getElementById('apiKeyLoading');
 
-      const messageBoxOverlay = document.getElementById("messageBoxOverlay");
-      const messageBoxTitle = document.getElementById("messageBoxTitle");
-      const messageBoxContent = document.getElementById("messageBoxContent");
-      const messageBoxCloseBtn = document.getElementById("messageBoxCloseBtn");
+        const messageBoxOverlay = document.getElementById('messageBoxOverlay');
+        const messageBoxTitle = document.getElementById('messageBoxTitle');
+        const messageBoxContent = document.getElementById('messageBoxContent');
+        const messageBoxCloseBtn = document.getElementById('messageBoxCloseBtn');
 
-      // --- Utility Functions ---
+        // --- Utility Functions ---
 
-      /**
-       * Displays a custom message box to the user.
-       * @param {string} title - The title of the message box.
-       * @param {string} message - The content message.
-       */
-      function showMessageBox(title, message) {
-        messageBoxTitle.textContent = title;
-        // Enhanced message for "Failed to fetch"
-        if (title === "Request Failed" && message.includes("Failed to fetch")) {
-          messageBoxContent.innerHTML = `${message}<br><br><strong>Possible reasons:</strong>
+        /**
+         * Displays a custom message box to the user.
+         * @param {string} title - The title of the message box.
+         * @param {string} message - The content message.
+         */
+        function showMessageBox(title, message) {
+            messageBoxTitle.textContent = title;
+            // Enhanced message for "Failed to fetch"
+            if (title === 'Request Failed' && message.includes('Failed to fetch')) {
+                messageBoxContent.innerHTML = `${message}<br><br><strong>Possible reasons:</strong>
                 <ul class="text-left mt-2 list-disc list-inside">
                     <li>Network issue.</li>
                     <li>The URL is not a valid API endpoint (it might be a website URL).</li>
@@ -546,249 +548,220 @@
                     <li>The API endpoint requires authentication or specific headers.</li>
                 </ul>
                 <p class="mt-2">Ensure you are targeting an actual API endpoint that returns structured data (like JSON) and allows cross-origin requests.</p>`;
-        } else {
-          messageBoxContent.textContent = message;
-        }
-        messageBoxOverlay.classList.remove("hidden");
-      }
-
-      /**
-       * Hides the custom message box.
-       */
-      messageBoxCloseBtn.addEventListener("click", () => {
-        messageBoxOverlay.classList.add("hidden");
-      });
-
-      /**
-       * Helper to escape HTML for displaying raw text safely
-       */
-      function escapeHtml(text) {
-        const div = document.createElement("div");
-        div.appendChild(document.createTextNode(text));
-        return div.innerHTML;
-      }
-
-      /**
-       * Renders response content with line numbers.
-       * @param {string} text - The raw text content to display.
-       */
-      function renderResponseContentWithLineNumbers(text) {
-        responseContentDiv.innerHTML = ""; // Clear previous content
-
-        if (!text) return;
-
-        let formattedText = text;
-        try {
-          // Try to pretty print JSON if it's valid
-          formattedText = JSON.stringify(JSON.parse(text), null, 2);
-        } catch (e) {
-          // Not JSON, use as is
+            } else {
+                messageBoxContent.textContent = message;
+            }
+            messageBoxOverlay.classList.remove('hidden');
         }
 
-        const lines = formattedText.split("\n");
-        lines.forEach((line, index) => {
-          const lineDiv = document.createElement("div");
-          lineDiv.classList.add("response-line");
-          // Use a span for the line number and another for the content
-          lineDiv.innerHTML = `<span class="line-number">${String(
-            index + 1
-          ).padStart(4, " ")}</span><span class="line-text">${escapeHtml(
-            line
-          )}</span>`;
-          responseContentDiv.appendChild(lineDiv);
+        /**
+         * Hides the custom message box.
+         */
+        messageBoxCloseBtn.addEventListener('click', () => {
+            messageBoxOverlay.classList.add('hidden');
         });
-      }
 
-      /**
-       * Parses headers from a JSON string in a textarea.
-       * @param {string} headersString - The string from the headers textarea.
-       * @returns {Object} - Parsed headers object.
-       */
-      function parseHeaders(headersString) {
-        try {
-          if (!headersString.trim()) {
-            return {};
-          }
-          return JSON.parse(headersString);
-        } catch (e) {
-          showMessageBox(
-            "Invalid Headers",
-            'Headers must be a valid JSON object. Example: `{"Content-Type": "application/json"}`'
-          );
-          return null;
-        }
-      }
-
-      /**
-       * Adds a message to the chat display.
-       * @param {string} text - The message text.
-       * @param {string} sender - 'user' or 'ai'.
-       */
-      function addChatMessage(text, sender) {
-        const messageDiv = document.createElement("div");
-        messageDiv.classList.add("chat-message", sender);
-        // Use innerHTML for messages that contain HTML (like links)
-        messageDiv.innerHTML = text;
-        chatMessagesDiv.appendChild(messageDiv);
-        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll to bottom
-      }
-
-      /**
-       * Displays a loading indicator in the chat.
-       * @returns {HTMLElement} The loading indicator element.
-       */
-      function showChatLoading() {
-        const loadingDiv = document.createElement("div");
-        loadingDiv.classList.add("loading-indicator", "ai");
-        loadingDiv.innerHTML =
-          '<div class="spinner"></div><span>Thinking...</span>';
-        chatMessagesDiv.appendChild(loadingDiv);
-        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
-        return loadingDiv;
-      }
-
-      /**
-       * Removes a loading indicator from the chat.
-       * @param {HTMLElement} loadingElement - The loading indicator element to remove.
-       */
-      function hideChatLoading(loadingElement) {
-        if (loadingElement && loadingElement.parentNode) {
-          loadingElement.parentNode.removeChild(loadingElement);
-        }
-      }
-
-      /**
-       * Displays a loading indicator on the send request button.
-       */
-      function showSendButtonLoading() {
-        sendRequestBtn.disabled = true;
-        sendRequestBtn.innerHTML = '<div class="spinner"></div> Sending...';
-      }
-
-      /**
-       * Hides the loading indicator on the send request button.
-       */
-      function hideSendButtonLoading() {
-        sendRequestBtn.disabled = false;
-        sendRequestBtn.innerHTML =
-          '<i class="fas fa-paper-plane"></i> Send Request';
-      }
-
-      // --- API Request Logic (Now sends to Extension Host) ---
-
-      sendRequestBtn.addEventListener("click", async () => {
-        const method = methodSelect.value;
-        const url = urlInput.value.trim();
-        const headers = parseHeaders(headersTextarea.value);
-        const body = bodyTextarea.value.trim();
-
-        console.log("Webview: Send Request button clicked."); // Log when button is clicked
-
-        if (!url) {
-          showMessageBox(
-            "Missing URL",
-            "Please enter a URL for the API request. Example: `https://jsonplaceholder.typicode.com/posts`"
-          );
-          return;
-        }
-        if (!headers) {
-          return;
+        /**
+         * Helper to escape HTML for displaying raw text safely
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
         }
 
-        let requestBody = null;
-        if (body) {
-          try {
-            requestBody = JSON.parse(body);
-          } catch (e) {
-            showMessageBox(
-              "Invalid Body",
-              'Request body must be a valid JSON object. Example: `{"key": "value"}`'
-            );
-            return;
-          }
+        /**
+         * Renders response content with line numbers.
+         * @param {string} text - The raw text content to display.
+         */
+        function renderResponseContentWithLineNumbers(text) {
+            responseContentDiv.innerHTML = ''; // Clear previous content
+
+            if (!text) return;
+
+            let formattedText = text;
+            try {
+                // Try to pretty print JSON if it's valid
+                formattedText = JSON.stringify(JSON.parse(text), null, 2);
+            } catch (e) {
+                // Not JSON, use as is
+            }
+
+            const lines = formattedText.split('\n');
+            lines.forEach((line, index) => {
+                const lineDiv = document.createElement('div');
+                lineDiv.classList.add('response-line');
+                // Use a span for the line number and another for the content
+                lineDiv.innerHTML = `<span class="line-number">${String(index + 1).padStart(4, ' ')}</span><span class="line-text">${escapeHtml(line)}</span>`;
+                responseContentDiv.appendChild(lineDiv);
+            });
         }
 
-        showSendButtonLoading();
-        responseStatusDiv.textContent = "Sending request...";
-        responseStatusDiv.className = "response-status info";
-        responseContentDiv.innerHTML = "";
+        /**
+         * Parses headers from a JSON string in a textarea.
+         * @param {string} headersString - The string from the headers textarea.
+         * @returns {Object} - Parsed headers object.
+         */
+        function parseHeaders(headersString) {
+            try {
+                if (!headersString.trim()) {
+                    return {};
+                }
+                return JSON.parse(headersString);
+            } catch (e) {
+                showMessageBox('Invalid Headers', 'Headers must be a valid JSON object. Example: `{"Content-Type": "application/json"}`');
+                return null;
+            }
+        }
 
-        // Send message to extension host to make the request
-        console.log(
-          "Webview: Sending sendHttpRequest message to extension host for URL:",
-          url
-        ); // Log before sending message
-        vscode.postMessage({
-          command: "sendHttpRequest",
-          data: { method, url, headers, body: requestBody },
+        /**
+         * Adds a message to the chat display.
+         * @param {string} text - The message text.
+         * @param {string} sender - 'user' or 'ai'.
+         */
+        function addChatMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message', sender);
+            // Use innerHTML for messages that contain HTML (like links)
+            messageDiv.innerHTML = text;
+            chatMessagesDiv.appendChild(messageDiv);
+            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll to bottom
+        }
+
+        /**
+         * Displays a loading indicator in the chat.
+         * @returns {HTMLElement} The loading indicator element.
+         */
+        function showChatLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('loading-indicator', 'ai');
+            loadingDiv.innerHTML = '<div class="spinner"></div><span>Thinking...</span>';
+            chatMessagesDiv.appendChild(loadingDiv);
+            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+            return loadingDiv;
+        }
+
+        /**
+         * Removes a loading indicator from the chat.
+         * @param {HTMLElement} loadingElement - The loading indicator element to remove.
+         */
+        function hideChatLoading(loadingElement) {
+            if (loadingElement && loadingElement.parentNode) {
+                loadingElement.parentNode.removeChild(loadingElement);
+            }
+        }
+
+        /**
+         * Displays a loading indicator on the send request button.
+         */
+        function showSendButtonLoading() {
+            sendRequestBtn.disabled = true;
+            sendRequestBtn.innerHTML = '<div class="spinner"></div> Sending...';
+        }
+
+        /**
+         * Hides the loading indicator on the send request button.
+         */
+        function hideSendButtonLoading() {
+            sendRequestBtn.disabled = false;
+            sendRequestBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Request';
+        }
+
+        // --- API Request Logic (Now sends to Extension Host) ---
+
+        sendRequestBtn.addEventListener('click', async () => {
+            const method = methodSelect.value;
+            const url = urlInput.value.trim();
+            const headers = parseHeaders(headersTextarea.value);
+            const body = bodyTextarea.value.trim();
+
+            console.log('Webview: Send Request button clicked.'); // Log when button is clicked
+
+            if (!url) {
+                showMessageBox('Missing URL', 'Please enter a URL for the API request. Example: `https://jsonplaceholder.typicode.com/posts`');
+                return;
+            }
+            if (!headers) {
+                return;
+            }
+
+            let requestBody = null;
+            if (body) {
+                try {
+                    requestBody = JSON.parse(body);
+                } catch (e) {
+                    showMessageBox('Invalid Body', 'Request body must be a valid JSON object. Example: `{"key": "value"}`');
+                    return;
+                }
+            }
+
+            showSendButtonLoading();
+            responseStatusDiv.textContent = 'Sending request...';
+            responseStatusDiv.className = 'response-status info';
+            responseContentDiv.innerHTML = '';
+
+            // Send message to extension host to make the request
+            console.log('Webview: Sending sendHttpRequest message to extension host for URL:', url); // Log before sending message
+            vscode.postMessage({
+                command: 'sendHttpRequest',
+                data: { method, url, headers, body: requestBody }
+            });
         });
-      });
 
-      // --- Clear Form Logic ---
-      clearFormBtn.addEventListener("click", () => {
-        resetForm();
-      });
+        // --- Clear Form Logic ---
+        clearFormBtn.addEventListener('click', () => {
+            resetForm();
+        });
 
-      function resetForm() {
-        methodSelect.value = "GET";
-        urlInput.value = "";
-        headersTextarea.value = JSON.stringify(
-          { "Content-Type": "application/json" },
-          null,
-          2
-        );
-        bodyTextarea.value = "";
-        responseStatusDiv.textContent = "Awaiting request...";
-        responseStatusDiv.className = "response-status info";
-        responseContentDiv.innerHTML = ""; // Clear content
-        showMessageBox(
-          "Form Cleared",
-          "All request fields have been reset to default."
-        );
-      }
-
-      // --- Copy Response Logic ---
-      copyResponseBtn.addEventListener("click", () => {
-        // Get the raw text content from the lines, excluding line numbers
-        let textToCopy = "";
-        document
-          .querySelectorAll(".response-line .line-text")
-          .forEach((span) => {
-            textToCopy += span.textContent + "\n";
-          });
-        textToCopy = textToCopy.trim(); // Remove trailing newline
-
-        if (textToCopy) {
-          // Use a temporary textarea to copy text to clipboard
-          const tempTextArea = document.createElement("textarea");
-          tempTextArea.value = textToCopy;
-          document.body.appendChild(tempTextArea);
-          tempTextArea.select();
-          try {
-            document.execCommand("copy");
-            showMessageBox("Copied!", "Response body copied to clipboard.");
-          } catch (err) {
-            console.error("Failed to copy text: ", err);
-            showMessageBox(
-              "Copy Failed",
-              "Could not copy text to clipboard. Please try manually."
-            );
-          } finally {
-            document.body.removeChild(tempTextArea);
-          }
-        } else {
-          showMessageBox("Nothing to Copy", "The response body is empty.");
+        function resetForm() {
+            methodSelect.value = 'GET';
+            urlInput.value = '';
+            headersTextarea.value = JSON.stringify({"Content-Type": "application/json"}, null, 2);
+            bodyTextarea.value = '';
+            responseStatusDiv.textContent = 'Awaiting request...';
+            responseStatusDiv.className = 'response-status info';
+            responseContentDiv.innerHTML = ''; // Clear content
+            showMessageBox('Form Cleared', 'All request fields have been reset to default.');
         }
-      });
 
-      // --- Copilot AI Logic (Now sends to Extension Host) ---
+        // --- Copy Response Logic ---
+        copyResponseBtn.addEventListener('click', () => {
+            // Get the raw text content from the lines, excluding line numbers
+            let textToCopy = '';
+            document.querySelectorAll('.response-line .line-text').forEach(span => {
+                textToCopy += span.textContent + '\n';
+            });
+            textToCopy = textToCopy.trim(); // Remove trailing newline
 
-      /**
-       * Displays the detailed guidance message for setting the API key.
-       */
-      function showApiKeyGuidance() {
-        addChatMessage(
-          `It looks like your Gemini API Key is not set. To enable AI assistance:
+            if (textToCopy) {
+                // Use a temporary textarea to copy text to clipboard
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = textToCopy;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                try {
+                    document.execCommand('copy');
+                    showMessageBox('Copied!', 'Response body copied to clipboard.');
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    showMessageBox('Copy Failed', 'Could not copy text to clipboard. Please try manually.');
+                } finally {
+                    document.body.removeChild(tempTextArea);
+                }
+            } else {
+                showMessageBox('Nothing to Copy', 'The response body is empty.');
+            }
+        });
+
+
+        // --- Copilot AI Logic (Now sends to Extension Host) ---
+
+        /**
+         * Displays the detailed guidance message for setting the API key.
+         */
+        function showApiKeyGuidance() {
+            addChatMessage(
+                `It looks like your Gemini API Key is not set. To enable AI assistance:
                 <ol>
                     <li>Get an API Key from <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.</li>
                     <li>In VS Code, open Settings (<code>Ctrl+,</code> or <code>Cmd+,</code>).</li>
@@ -796,43 +769,39 @@
                     <li>Paste your API Key into the "Gemini Api Key" field.</li>
                     <li>Restart the Extension Development Host.</li>
                 </ol>
-                `,
-          "ai"
-        );
-        copilotInput.disabled = true; // Keep disabled
-        sendCopilotBtn.disabled = true; // Keep disabled
-      }
-
-      sendCopilotBtn.addEventListener("click", async () => {
-        const userPrompt = copilotInput.value.trim();
-        if (!userPrompt) {
-          showMessageBox(
-            "Empty Prompt",
-            "Please type something for the Copilot AI."
-          );
-          return;
+                `, 'ai');
+            copilotInput.disabled = true; // Keep disabled
+            sendCopilotBtn.disabled = true; // Keep disabled
         }
 
-        if (!geminiApiKey) {
-          showApiKeyGuidance();
-          return;
-        }
+        sendCopilotBtn.addEventListener('click', async () => {
+            const userPrompt = copilotInput.value.trim();
+            if (!userPrompt) {
+                showMessageBox('Empty Prompt', 'Please type something for the Copilot AI.');
+                return;
+            }
 
-        addChatMessage(userPrompt, "user");
-        copilotInput.value = "";
+            if (!geminiApiKey) {
+                showApiKeyGuidance();
+                return;
+            }
 
-        const loadingIndicator = showChatLoading();
+            addChatMessage(userPrompt, 'user');
+            copilotInput.value = '';
 
-        const currentRequest = {
-          url: urlInput.value,
-          method: methodSelect.value,
-          headers: headersTextarea.value,
-          body: bodyTextarea.value,
-          responseStatus: responseStatusDiv.textContent,
-          responseBody: responseContentDiv.textContent,
-        };
+            const loadingIndicator = showChatLoading();
+            console.log('Webview: Sending getGeminiSuggestion message to extension host for prompt:', userPrompt); // NEW LOG
 
-        let fullPrompt = `You are an AI assistant for an API client.
+            const currentRequest = {
+                url: urlInput.value,
+                method: methodSelect.value,
+                headers: headersTextarea.value,
+                body: bodyTextarea.value,
+                responseStatus: responseStatusDiv.textContent,
+                responseBody: responseContentDiv.textContent
+            };
+
+            let fullPrompt = `You are an AI assistant for an API client.
             The user wants to perform an action related to an API request.
             If the user's request contains a URL (e.g., "https://example.com/api" or "https://www.npmjs.com/package/axios"), assume they want to generate a request for that URL.
             If the URL looks like a common website (e.g., npmjs.com, github.com, docs.google.com), infer the corresponding public API endpoint if one commonly exists for that service (e.g., for npmjs.com, use registry.npmjs.org; for github.com, use api.github.com).
@@ -845,16 +814,12 @@
             User's request: "${userPrompt}"
 
             Current API request context (for reference, if applicable):
-            URL: ${currentRequest.url || "Not set"}
-            Method: ${currentRequest.method || "Not set"}
-            Headers: ${currentRequest.headers || "Not set"}
-            Body: ${currentRequest.body || "Not set"}
-            Last Response Status: ${
-              currentRequest.responseStatus || "No response yet"
-            }
-            Last Response Body: ${
-              currentRequest.responseBody || "No response yet"
-            }
+            URL: ${currentRequest.url || 'Not set'}
+            Method: ${currentRequest.method || 'Not set'}
+            Headers: ${currentRequest.headers || 'Not set'}
+            Body: ${currentRequest.body || 'Not set'}
+            Last Response Status: ${currentRequest.responseStatus || 'No response yet'}
+            Last Response Body: ${currentRequest.responseBody || 'No response yet'}
 
             Examples of expected JSON output for request generation:
             \`\`\`json
@@ -887,21 +852,14 @@
             \`\`\`
             `;
 
-        if (
-          userPrompt.toLowerCase().includes("test") ||
-          userPrompt.toLowerCase().includes("assertion")
-        ) {
-          fullPrompt = `You are an AI assistant for an API client. The user wants a test suggestion. Provide a JavaScript test script for a Postman-like environment.
+            if (userPrompt.toLowerCase().includes('test') || userPrompt.toLowerCase().includes('assertion')) {
+                fullPrompt = `You are an AI assistant for an API client. The user wants a test suggestion. Provide a JavaScript test script for a Postman-like environment.
                 User's request: "${userPrompt}"
                 Current API request context:
-                URL: ${currentRequest.url || "Not set"}
-                Method: ${currentRequest.method || "Not set"}
-                Last Response Status: ${
-                  currentRequest.responseStatus || "No response yet"
-                }
-                Last Response Body: ${
-                  currentRequest.responseBody || "No response yet"
-                }
+                URL: ${currentRequest.url || 'Not set'}
+                Method: ${currentRequest.method || 'Not set'}
+                Last Response Status: ${currentRequest.responseStatus || 'No response yet'}
+                Last Response Body: ${currentRequest.responseBody || 'No response yet'}
 
                 Example test for 200 OK status and JSON body content:
                 \`\`\`javascript
@@ -925,84 +883,71 @@
                 }
                 \`\`\`
                 `;
-        } else if (
-          userPrompt.toLowerCase().includes("explain") ||
-          userPrompt.toLowerCase().includes("troubleshoot")
-        ) {
-          fullPrompt = `You are an AI assistant for an API client. The user wants an explanation or troubleshooting advice.
+            } else if (userPrompt.toLowerCase().includes('explain') || userPrompt.toLowerCase().includes('troubleshoot')) {
+                fullPrompt = `You are an AI assistant for an API client. The user wants an explanation or troubleshooting advice.
                 User's request: "${userPrompt}"
                 Current API request context:
-                URL: ${currentRequest.url || "Not set"}
-                Method: ${currentRequest.method || "Not set"}
-                Last Response Status: ${
-                  currentRequest.responseStatus || "No response yet"
-                }
-                Last Response Body: ${
-                  currentRequest.responseBody || "No response yet"
-                }
+                URL: ${currentRequest.url || 'Not set'}
+                Method: ${currentRequest.method || 'Not set'}
+                Last Response Status: ${currentRequest.responseStatus || 'No response yet'}
+                Last Response Body: ${currentRequest.responseBody || 'No response yet'}
 
                 Provide a concise, plain text explanation.
                 Example: "A 404 Not Found error means the server could not find the requested resource. Check the URL for typos or if the resource exists on the server."
                 `;
-        }
-
-        // Send message to extension host for Gemini AI request
-        vscode.postMessage({
-          command: "getGeminiSuggestion",
-          data: { prompt: fullPrompt },
-        });
-      });
-
-      copilotInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          sendCopilotBtn.click();
-        }
-      });
-
-      // --- Receive API Response from Extension Host ---
-      window.addEventListener("message", (event) => {
-        const message = event.data;
-        switch (message.command) {
-          case "httpResponse":
-            hideSendButtonLoading();
-            const { status, statusText, timeTaken, responseData, error } =
-              message.data;
-
-            if (error) {
-              responseStatusDiv.textContent = `Error: ${error.message}`;
-              responseStatusDiv.classList.remove("success", "info");
-              responseStatusDiv.classList.add("error");
-              responseContentDiv.innerHTML =
-                '<div class="response-line"><span class="line-number">   1</span><span class="line-text">Failed to fetch. Check VS Code output for details.</span></div>';
-              showMessageBox(
-                "Request Failed",
-                `Could not send request: ${error.message}. This often happens if the URL is not a valid API endpoint, or due to network issues.`
-              );
-            } else {
-              responseStatusDiv.textContent = `Status: ${status} ${statusText} (${timeTaken}ms)`;
-              if (status >= 200 && status < 300) {
-                responseStatusDiv.classList.remove("error", "info");
-                responseStatusDiv.classList.add("success");
-              } else {
-                responseStatusDiv.classList.remove("success", "info");
-                responseStatusDiv.classList.add("error");
-              }
-              renderResponseContentWithLineNumbers(responseData);
             }
-            break;
 
-          case "sendGeminiApiKey":
-            geminiApiKey = message.apiKey;
-            hideChatLoading(apiKeyLoadingIndicator);
-            if (geminiApiKey) {
-              addChatMessage(
-                "Gemini AI is ready! You can now ask for assistance.",
-                "ai"
-              );
-              copilotInput.disabled = false;
-              sendCopilotBtn.disabled = false;
-              addChatMessage(
-                `
+            // Send message to extension host for Gemini AI request
+            vscode.postMessage({
+                command: 'getGeminiSuggestion',
+                data: { prompt: fullPrompt }
+            });
+        });
+
+        copilotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendCopilotBtn.click();
+            }
+        });
+
+        // --- Receive API Response from Extension Host ---
+        window.addEventListener('message', event => {
+            const message = event.data;
+            console.log('Webview: Received message from extension host:', message.command); // NEW LOG
+            switch (message.command) {
+                case 'httpResponse':
+                    hideSendButtonLoading();
+                    const { status, statusText, timeTaken, responseData, error } = message.data;
+
+                    if (error) {
+                        responseStatusDiv.textContent = `Error: ${error.message}`;
+                        responseStatusDiv.classList.remove('success', 'info');
+                        responseStatusDiv.classList.add('error');
+                        responseContentDiv.innerHTML = '<div class="response-line"><span class="line-number">   1</span><span class="line-text">Failed to fetch. Check VS Code output for details.</span></div>';
+                        showMessageBox('Request Failed', `Could not send request: ${error.message}. This often happens if the URL is not a valid API endpoint, or due to network issues.`);
+                    } else {
+                        responseStatusDiv.textContent = `Status: ${status} ${statusText} (${timeTaken}ms)`;
+                        if (status >= 200 && status < 300) {
+                            responseStatusDiv.classList.remove('error', 'info');
+                            responseStatusDiv.classList.add('success');
+                        } else {
+                            responseStatusDiv.classList.remove('success', 'info');
+                            responseStatusDiv.classList.add('error');
+                        }
+                        renderResponseContentWithLineNumbers(responseData);
+                    }
+                    break;
+
+                case 'sendGeminiApiKey':
+                    console.log('Webview: Received sendGeminiApiKey from extension host.'); // NEW LOG
+                    geminiApiKey = message.apiKey;
+                    hideChatLoading(apiKeyLoadingIndicator);
+                    // Only display initial messages if they haven't been displayed before
+                    if (geminiApiKey && !initialCopilotMessagesDisplayed) {
+                        addChatMessage('Gemini AI is ready! You can now ask for assistance.', 'ai');
+                        copilotInput.disabled = false;
+                        sendCopilotBtn.disabled = false;
+                        addChatMessage(`
                             <p>You can try these sample requests:</p>
                             <ul>
                                 <li><span class="sample-request-link" data-url="https://jsonplaceholder.typicode.com/posts/1" data-method="GET" data-headers='{}'>GET: JSONPlaceholder Post</span></li>
@@ -1011,82 +956,54 @@
                                 <li><span class="sample-request-link" data-url="https://jsonplaceholder.typicode.com/posts" data-method="POST" data-headers='{"Content-Type": "application/json"}' data-body='{"title": "My New Post", "body": "This is some content.", "userId": 1}'>POST: JSONPlaceholder New Post</span></li>
                             </ul>
                             <p>Click on any of them to auto-fill the request form!</p>
-                        `,
-                "ai"
-              );
+                        `, 'ai');
 
-              document
-                .querySelectorAll(".sample-request-link")
-                .forEach((link) => {
-                  link.addEventListener("click", function () {
-                    urlInput.value = this.dataset.url || "";
-                    methodSelect.value = this.dataset.method || "GET";
-                    try {
-                      headersTextarea.value = this.dataset.headers
-                        ? JSON.stringify(
-                            JSON.parse(this.dataset.headers),
-                            null,
-                            2
-                          )
-                        : JSON.stringify(
-                            { "Content-Type": "application/json" },
-                            null,
-                            2
-                          );
-                    } catch (e) {
-                      headersTextarea.value = JSON.stringify(
-                        { "Content-Type": "application/json" },
-                        null,
-                        2
-                      );
+                        document.querySelectorAll('.sample-request-link').forEach(link => {
+                            link.addEventListener('click', function() {
+                                urlInput.value = this.dataset.url || '';
+                                methodSelect.value = this.dataset.method || 'GET';
+                                try {
+                                    headersTextarea.value = this.dataset.headers ? JSON.stringify(JSON.parse(this.dataset.headers), null, 2) : JSON.stringify({"Content-Type": "application/json"}, null, 2);
+                                } catch (e) {
+                                    headersTextarea.value = JSON.stringify({"Content-Type": "application/json"}, null, 2);
+                                }
+                                bodyTextarea.value = this.dataset.body ? JSON.stringify(JSON.parse(this.dataset.body), null, 2) : '';
+                                addChatMessage(`Auto-filled request: ${this.textContent}`, 'ai');
+                            });
+                        });
+                        initialCopilotMessagesDisplayed = true; // Set the flag after displaying messages
+                    } else if (!geminiApiKey) {
+                        showApiKeyGuidance();
                     }
-                    bodyTextarea.value = this.dataset.body
-                      ? JSON.stringify(JSON.parse(this.dataset.body), null, 2)
-                      : "";
-                    addChatMessage(
-                      `Auto-filled request: ${this.textContent}`,
-                      "ai"
-                    );
-                  });
-                });
-            } else {
-              showApiKeyGuidance();
+                    break;
+
+                case 'geminiResponse':
+                    console.log('Webview: Received geminiResponse from extension host.'); // NEW LOG
+                    // Assuming loadingElement is passed back in the message.data
+                    // If not, you might need a global way to track the loading indicator
+                    // or remove this parameter.
+                    hideChatLoading(document.querySelector('.loading-indicator.ai')); // Fallback if element not passed
+
+                    if (message.data.error) {
+                        addChatMessage(`AI Error: ${message.data.error.message}`, 'ai');
+                    } else {
+                        if (message.data.aiText && message.data.aiText.includes('```json')) {
+                            applyAiSuggestions(message.data.aiText);
+                        } else if (message.data.aiText) {
+                            addChatMessage(message.data.aiText, 'ai');
+                        }
+                    }
+                    break;
             }
-            break;
+        });
 
-          case "geminiResponse":
-            // Assuming loadingElement is passed back in the message.data
-            // If not, you might need a global way to track the loading indicator
-            // or remove this parameter.
-            hideChatLoading(document.querySelector(".loading-indicator.ai")); // Fallback if element not passed
+        // Initial setup for headers and body textareas
+        headersTextarea.value = JSON.stringify({"Content-Type": "application/json"}, null, 2);
+        bodyTextarea.value = JSON.stringify({"message": "Hello from Postman Lite!"}, null, 2);
 
-            if (message.data.error) {
-              addChatMessage(`AI Error: ${message.data.error.message}`, "ai");
-            } else {
-              if (
-                message.data.aiText &&
-                message.data.aiText.includes("```json")
-              ) {
-                applyAiSuggestions(message.data.aiText);
-              } else if (message.data.aiText) {
-                addChatMessage(message.data.aiText, "ai");
-              }
-            }
-            break;
-        }
-      });
+        // Request the API key from the extension host when the webview loads
+        vscode.postMessage({ command: 'getGeminiApiKey' });
 
-      // Initial setup for headers and body textareas
-      headersTextarea.value = JSON.stringify(
-        { "Content-Type": "application/json" },
-        null,
-        2
-      );
-      bodyTextarea.value = JSON.stringify(
-        { message: "Hello from Postman Lite!" },
-        null,
-        2
-      );
     </script>
-  </body>
+</body>
 </html>
